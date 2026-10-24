@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Princípio do menor privilégio: o CI só precisa ler o repositório
+permissions:
+  contents: read
+
+# Cancela execuções antigas do mesmo PR; nunca cancela execuções na main
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      # ETAPA 2: descomentar quando o Prisma for instalado
+      # - name: Prisma generate
+      #   run: npx prisma generate
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm run test
+
+      - name: Build
+        run: npm run build
+        # ETAPA 2/3: quando o build precisar de variáveis, usar valores FICTÍCIOS aqui
+        # (ex.: DATABASE_URL: file:./ci.db), não secrets reais. PRs de forks não
+        # recebem secrets, e o build não deve depender deles.
+        # env:
+        #   DATABASE_URL: file:./ci.db
+        #   NEXTAUTH_SECRET: ci-secret-nao-usar-em-producao
