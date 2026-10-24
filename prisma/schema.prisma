@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Prisoner {
+  id       Int      @id @default(autoincrement())
+  number   Int      @unique
+  fullName String
+  nickname String
+  slug     String   @unique
+  images   Image[]
+  votes    Vote[]
+  results  Result[]
+}
+
+model Image {
+  id         Int      @id @default(autoincrement())
+  prisonerId Int
+  season     Int
+  url        String
+  prisoner   Prisoner @relation(fields: [prisonerId], references: [id])
+
+  @@unique([prisonerId, season])
+}
+
+model Season {
+  id       Int       @id @default(autoincrement())
+  number   Int       @unique
+  status   String    @default("idle")
+  startsAt DateTime?
+  endsAt   DateTime?
+  results  Result[]
+  votes    Vote[]
+}
+
+model Vote {
+  id         Int      @id @default(autoincrement())
+  prisonerId Int
+  seasonId   Int
+  choice     String
+  voterKey   String
+  createdAt  DateTime @default(now())
+  prisoner   Prisoner @relation(fields: [prisonerId], references: [id])
+  season     Season   @relation(fields: [seasonId], references: [id])
+
+  @@index([prisonerId, seasonId])
+  @@index([voterKey, prisonerId, createdAt])
+  @@index([seasonId, prisonerId, choice])
+}
+
+model Result {
+  id              Int      @id @default(autoincrement())
+  prisonerId      Int
+  seasonId        Int
+  forgiveCount    Int
+  notForgiveCount Int
+  verdict         String
+  prisoner        Prisoner @relation(fields: [prisonerId], references: [id])
+  season          Season   @relation(fields: [seasonId], references: [id])
+
+  @@unique([prisonerId, seasonId])
+}

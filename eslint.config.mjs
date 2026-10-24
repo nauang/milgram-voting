@@ -28,6 +28,7 @@ const eslintConfig = defineConfig([
     "test-results/**",
     "reference/**", // Importante para não ler os HTMLs
     "docs/**",      // Importante para não ler os markdowns
+    "src/generated/**",
   ]),
 ]);
 

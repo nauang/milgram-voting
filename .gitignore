@@ -50,3 +50,9 @@ yarn-error.log*
 Thumbs.db
 *.pem
 /reference/
+# client gerado pelo Prisma (rodar: npx prisma generate)
+/src/generated
+
+# banco SQLite de dev (qualquer local)
+*.db
+*.db-journal
