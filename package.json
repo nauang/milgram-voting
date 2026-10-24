@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
@@ -14,7 +14,8 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
-    "db:reset": "prisma migrate reset"
+    "db:reset": "prisma migrate reset",
+    "postinstall": "prisma generate"
   },
   "engines": {
     "node": ">=20.9.0"
@@ -61,9 +62,5 @@
     "tsx": "^4.21.0",
     "typescript": "^5",
     "vitest": "^5.0.5"
-  },
-  "allowScripts": {
-    "better-sqlite3@12.11.1": true,
-    "better-sqlite3@13.0.3": true
   }
 }
