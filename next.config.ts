@@ -2,10 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    // Placeholders até o upload real pelo /admin (seed usa placehold.co/.../png)
     remotePatterns: [{ protocol: "https", hostname: "placehold.co", pathname: "/**" }],
   },
-  // A CSP do §8.4 entra aqui na etapa de segurança.
+  // Permite que o Chromium headless (Lighthouse) acesse HMR via 127.0.0.1
+  allowedDevOrigins: ["127.0.0.1", "localhost"],
 };
 
 export default nextConfig;
