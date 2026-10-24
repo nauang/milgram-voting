@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { VoteDiamond } from "./VoteDiamond";
@@ -68,11 +69,15 @@ export function Modal({ prisoner, isOpen, isSubmitting, onClose, onVote }: Modal
             {/* Imagem Esquerda (Desktop) */}
             <div className="md:w-1/2 w-full">
               {prisoner.imageUrl ? (
-                <img
-                  src={prisoner.imageUrl}
-                  alt={prisoner.nickname}
-                  className="aspect-[3/4] w-full border border-white/10 object-cover"
-                />
+                <div className="relative aspect-[3/4] w-full overflow-hidden border border-white/10">
+                  <Image
+                    src={prisoner.imageUrl}
+                    alt={prisoner.nickname}
+                    fill
+                    sizes="(min-width: 768px) 50vw, 100vw"
+                    className="object-cover"
+                  />
+                </div>
               ) : (
                 <div className="flex aspect-[3/4] w-full items-center justify-center bg-black">
                   Sem imagem
