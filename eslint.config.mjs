@@ -7,7 +7,6 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   {
-    // Regras do PROMPT §15.4
     rules: {
       "no-console": ["warn", { allow: ["warn", "error"] }],
       "no-unused-vars": "off",
@@ -16,7 +15,6 @@ const eslintConfig = defineConfig([
       "prefer-const": "error",
     },
   },
-  // Deve ser o último: desliga regras que brigam com o Prettier
   prettier,
   globalIgnores([
     ".next/**",
@@ -26,9 +24,8 @@ const eslintConfig = defineConfig([
     "coverage/**",
     "playwright-report/**",
     "test-results/**",
-    "reference/**", // Importante para não ler os HTMLs
-    "docs/**",      // Importante para não ler os markdowns
-    "src/generated/**",
+    "reference/**",
+    "docs/**",
   ]),
 ]);
 
