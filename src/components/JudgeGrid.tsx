@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { PrisonerCard } from "./PrisonerCard";
-import { Modal } from "./Modal";
+import { Modal, type ModalStatus } from "./Modal";
 import type { JudgePrisoner, VoteChoice } from "@/types/domain";
 
 interface JudgeGridProps {
@@ -13,13 +13,21 @@ interface JudgeGridProps {
 export function JudgeGrid({ initialPrisoners, seasonNumber }: JudgeGridProps) {
   const [prisoners, setPrisoners] = useState(initialPrisoners);
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [status, setStatus] = useState<ModalStatus>("idle");
+  const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
   const selectedPrisoner = prisoners.find((p) => p.id === selectedId) || null;
 
+  const closeModal = () => {
+    setSelectedId(null);
+    setStatus("idle");
+    setErrorMessage(undefined);
+  };
+
   const handleVote = async (choice: VoteChoice) => {
     if (!selectedId) return;
-    setIsSubmitting(true);
+    setStatus("submitting");
+    setErrorMessage(undefined);
 
     try {
       const res = await fetch("/api/vote", {
@@ -29,32 +37,27 @@ export function JudgeGrid({ initialPrisoners, seasonNumber }: JudgeGridProps) {
       });
 
       if (!res.ok) {
-        const err = await res.json();
+        const err = await res.json().catch(() => ({}));
         if (res.status === 409) {
-          // Já votou
-          alert("Você já votou neste prisioneiro hoje.");
+          // Marca como já votado e mostra sucesso (a UI já refletiu o estado real)
           setPrisoners((prev) =>
             prev.map((p) => (p.id === selectedId ? { ...p, state: "voted" } : p)),
           );
-        } else {
-          alert(err.error || "Erro ao votar.");
+          setStatus("success");
+          setTimeout(() => closeModal(), 1500);
+          return;
         }
-        setIsSubmitting(false);
+        setStatus("error");
+        setErrorMessage(err.error ?? "Erro ao votar. Tente novamente.");
         return;
       }
 
-      // Sucesso
       setPrisoners((prev) => prev.map((p) => (p.id === selectedId ? { ...p, state: "voted" } : p)));
-
-      // Fecha após 1.5s (como no PROMPT)
-      setTimeout(() => {
-        setSelectedId(null);
-        setIsSubmitting(false);
-      }, 1500);
-    } catch (error) {
-      console.error(error);
-      alert("Erro de rede.");
-      setIsSubmitting(false);
+      setStatus("success");
+      setTimeout(() => closeModal(), 1500);
+    } catch {
+      setStatus("error");
+      setErrorMessage("Erro de rede. Tente novamente.");
     }
   };
 
@@ -66,7 +69,10 @@ export function JudgeGrid({ initialPrisoners, seasonNumber }: JudgeGridProps) {
             <PrisonerCard
               prisoner={prisoner}
               seasonNumber={seasonNumber}
-              onSelect={(id) => setSelectedId(id)}
+              onSelect={(id) => {
+                setSelectedId(id);
+                setStatus("idle");
+              }}
               priority={index < 2}
             />
           </li>
@@ -76,8 +82,9 @@ export function JudgeGrid({ initialPrisoners, seasonNumber }: JudgeGridProps) {
       <Modal
         prisoner={selectedPrisoner}
         isOpen={selectedId !== null}
-        isSubmitting={isSubmitting}
-        onClose={() => setSelectedId(null)}
+        status={status}
+        errorMessage={errorMessage}
+        onClose={closeModal}
         onVote={handleVote}
       />
     </>

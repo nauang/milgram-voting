@@ -8,21 +8,12 @@ interface VoteDiamondProps {
   onClick: (choice: VoteChoice) => void;
 }
 
-/**
- * Losango SVG com rect rotacionado 45° — replica a geometria do site oficial
- * (matrix(0.7066957 0.7075177 -0.7075177 0.7066957 ...) = rotação de 45°).
- *
- * Estados:
- * - idle: borda colorida sobre fundo preto translúcido
- * - hover/focus: preenchimento colorido + texto invertido + glow
- */
 export function VoteDiamond({ choice, disabled, onClick }: VoteDiamondProps) {
   const isForgive = choice === "forgive";
   const label = isForgive ? "Perdoar" : "Não perdoar";
   const labelAria = `${label} este prisioneiro`;
   const kanji = isForgive ? "赦す" : "赦さない";
 
-  // Cores por escolha (paleta do PROMPT §6)
   const borderColor = isForgive ? "border-white" : "border-[#E4007F]";
   const textColor = isForgive ? "text-white" : "text-[#E4007F]";
   const hoverFill = isForgive
@@ -42,21 +33,19 @@ export function VoteDiamond({ choice, disabled, onClick }: VoteDiamondProps) {
       onClick={() => onClick(choice)}
       disabled={disabled}
       aria-label={labelAria}
-      className="group md:gap-6 flex flex-col items-center gap-5 transition-all focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
+      className="group flex flex-col items-center gap-5 transition-all focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 sm:gap-6"
     >
-      {/* Losango (div rotacionado 45° = mesmo visual do SVG matrix do site oficial) */}
       <div
-        className={`flex h-24 w-24 rotate-45 items-center justify-center border-2 ${borderColor} bg-black/60 transition-all duration-200 ease-out ${hoverFill} ${glow} group-hover:scale-110 group-focus-visible:scale-110 group-focus-visible:ring-4 group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-[#1a1a1a] ${ringColor} md:h-32 md:w-32`}
+        className={`flex h-24 w-24 rotate-45 items-center justify-center border-2 ${borderColor} bg-black/60 transition-all duration-200 ease-out ${hoverFill} ${glow} group-hover:scale-110 group-focus-visible:scale-110 group-focus-visible:ring-4 group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-[#1a1a1a] ${ringColor} sm:h-32 sm:w-32`}
       >
         <span
-          className={`-rotate-45 text-lg font-bold tracking-wider ${textColor} ${hoverText} md:text-2xl transition-colors duration-200`}
+          className={`-rotate-45 text-lg font-bold tracking-wider ${textColor} ${hoverText} transition-colors duration-200 sm:text-2xl`}
         >
           {kanji}
         </span>
       </div>
 
-      {/* Label inferior (PT-BR) */}
-      <span className="md:text-xs text-[0.65rem] font-bold tracking-[0.2em] text-white/60 uppercase transition-colors group-hover:text-white group-focus-visible:text-white">
+      <span className="text-[0.65rem] font-bold tracking-[0.2em] text-white/60 uppercase transition-colors group-hover:text-white group-focus-visible:text-white sm:text-xs">
         {label}
       </span>
     </button>
