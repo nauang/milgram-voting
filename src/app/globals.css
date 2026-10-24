@@ -1,26 +1,42 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #000000;
+  --fg: #ffffff;
+  --accent: #e4007f;
+  --accent-2: #ff003c;
+  --card: #1a1a1a;
+  --forgive: #ffffff;
+  --not-forgive: #e4007f;
+}
+
+/* Breakpoints do PROMPT §6.2: usar apenas sm (560), lg (960, desktop) e xl (1280) */
+@theme {
+  --breakpoint-*: initial;
+  --breakpoint-sm: 560px;
+  --breakpoint-lg: 960px;
+  --breakpoint-xl: 1280px;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --color-card: var(--card);
+  --font-sans:
+    "Inter", "Helvetica Neue", Helvetica, Arial, "Noto Sans JP", "Hiragino Sans", "Yu Gothic",
+    sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+}
+
+/* Foco visível (PROMPT §8.2). Nunca remover sem substituto. */
+:focus-visible {
+  outline: 3px solid rgba(228, 0, 127, 0.4);
+  outline-offset: 2px;
 }
