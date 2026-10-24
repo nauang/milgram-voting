@@ -1,4 +1,4 @@
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client";
 
 const TOTAL_SEASONS = 3;
@@ -29,7 +29,7 @@ async function main(): Promise<void> {
     throw new Error("DATABASE_URL não definida. Copie .env.example para .env.local.");
   }
 
-  const prisma = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url }) });
+  const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: url }) });
 
   try {
     // Temporadas: só a 1ª começa em "voting". O seed é idempotente, então `update: {}`

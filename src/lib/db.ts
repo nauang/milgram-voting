@@ -1,8 +1,8 @@
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@/generated/prisma/client";
 
 // Em dev, o hot reload recria os módulos a cada alteração. Sem este cache em globalThis,
-// cada reload abriria uma nova conexão com o SQLite.
+// cada reload abriria uma nova conexão com o Postgres.
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
 function createPrismaClient(): PrismaClient {
@@ -10,7 +10,7 @@ function createPrismaClient(): PrismaClient {
   if (!url) {
     throw new Error("DATABASE_URL não definida. Copie .env.example para .env.local.");
   }
-  return new PrismaClient({ adapter: new PrismaBetterSqlite3({ url }) });
+  return new PrismaClient({ adapter: new PrismaPg({ connectionString: url }) });
 }
 
 export const prisma = globalForPrisma.prisma ?? createPrismaClient();
