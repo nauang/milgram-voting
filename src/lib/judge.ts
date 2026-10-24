@@ -1,8 +1,10 @@
+import { createHash } from "node:crypto";
 import { cache } from "react";
 import { prisma } from "@/lib/db";
 import { getPrisonerImage } from "@/lib/prisoner-image";
 import { calculatePrisonerState } from "@/lib/prisoner-state";
 import { getCurrentSeason } from "@/lib/season";
+import { getVisitorCookie } from "@/lib/voter";
 import {
   seasonStatusSchema,
   verdictSchema,
@@ -16,12 +18,29 @@ export interface JudgeData {
 }
 
 /**
- * Prisioneiros em que ESTE visitante já votou nas últimas 24h (decisão D4: o servidor é a
- * fonte da verdade). Sem a API de voto ainda não existe voterKey, então a lista é vazia.
- * A versão real (cookie + IP + janela de 24h) entra junto com o POST /api/vote.
+ * Prisioneiros em que ESTE visitante já votou nas últimas 24h.
+ * Lê o cookie do visitante, calcula o voterKey e consulta o banco.
  */
 async function getVotedPrisonerIds(): Promise<ReadonlySet<number>> {
-  return new Set<number>();
+  const cookieId = await getVisitorCookie();
+  if (!cookieId) {
+    return new Set<number>();
+  }
+
+  const voterKey = createHash("sha256")
+    .update(`${cookieId}:${process.env.VOTER_SALT ?? "dev-salt-change-me"}`)
+    .digest("hex");
+
+  const limit24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const recentVotes = await prisma.vote.findMany({
+    where: {
+      voterKey,
+      createdAt: { gte: limit24h },
+    },
+    select: { prisonerId: true },
+  });
+
+  return new Set(recentVotes.map((v) => v.prisonerId));
 }
 
 /**

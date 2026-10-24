@@ -61,12 +61,13 @@ export function JudgeGrid({ initialPrisoners, seasonNumber }: JudgeGridProps) {
   return (
     <>
       <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 lg:gap-4">
-        {prisoners.map((prisoner) => (
+        {prisoners.map((prisoner, index) => (
           <li key={prisoner.id}>
             <PrisonerCard
               prisoner={prisoner}
               seasonNumber={seasonNumber}
               onSelect={(id) => setSelectedId(id)}
+              priority={index < 2}
             />
           </li>
         ))}

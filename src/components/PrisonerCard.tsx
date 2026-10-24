@@ -10,6 +10,8 @@ interface PrisonerCardProps {
   seasonNumber: number;
   /** Abre o modal (voto ou "já votou hoje"). Sem ele, o card de votação não é clicável. */
   onSelect?: (prisonerId: number) => void;
+  /** Marca como LCP (eager load). Apenas os primeiros cards do grid. */
+  priority?: boolean;
 }
 
 // Nunca depender só de cor (PROMPT §8.2): todo estado tem texto + ícone + borda.
@@ -67,7 +69,12 @@ const STATE_PRESENTATION: Record<
 const STRETCHED_CLICK_AREA =
   "after:absolute after:inset-0 after:content-[''] focus-visible:outline-none";
 
-export function PrisonerCard({ prisoner, seasonNumber, onSelect }: PrisonerCardProps) {
+export function PrisonerCard({
+  prisoner,
+  seasonNumber,
+  onSelect,
+  priority = false,
+}: PrisonerCardProps) {
   const { id, number, slug, nickname, fullName, imageUrl, state } = prisoner;
   const presentation = STATE_PRESENTATION[state];
   const numberLabel = formatPrisonerNumber(number);
@@ -121,6 +128,7 @@ export function PrisonerCard({ prisoner, seasonNumber, onSelect }: PrisonerCardP
             fill
             sizes="(min-width: 960px) 20vw, (min-width: 560px) 33vw, 50vw"
             className={`object-cover ${presentation.imageClass}`}
+            priority={priority}
           />
         ) : (
           <div className="flex h-full items-center justify-center bg-black text-xs text-white/70">
