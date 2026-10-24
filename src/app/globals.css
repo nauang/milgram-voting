@@ -26,8 +26,13 @@
   --font-sans: var(--font-inter), var(--font-noto-jp), "Hiragino Sans", "Yu Gothic", sans-serif;
 }
 
-body {
+/* Fundo no html para o canvas com z-index:-1 aparecer */
+html {
   background: var(--bg);
+  min-height: 100dvh;
+}
+
+body {
   color: var(--fg);
   font-family: var(--font-sans);
 }
@@ -123,5 +128,33 @@ body {
   .glitch::before,
   .glitch::after {
     display: none !important;
+  }
+}
+
+/* --- Partículas de fundo (CSS puro) --- */
+@keyframes particle-rise {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(0, -110vh, 0);
+  }
+}
+
+.particle {
+  position: absolute;
+  bottom: 0;
+  border-radius: 50%;
+  background: #e4007f;
+  box-shadow: 0 0 6px rgba(228, 0, 127, 0.6);
+  will-change: transform;
+  backface-visibility: hidden;
+  animation: particle-rise linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .particle {
+    animation: none;
+    display: none;
   }
 }
