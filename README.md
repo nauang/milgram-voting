@@ -108,7 +108,7 @@ A página replica o fluxo oficial:
 
 ```bash
 # 1. Clone o repositório
-git clone https://github.com/{SEU_USUARIO}/milgram-voting.git
+git clone https://github.com/nauang/milgram-voting.git
 cd milgram-voting
 
 # 2. Instale as dependências
@@ -226,6 +226,8 @@ Cobre:
 - `calculatePrisonerState` — todos os estados (`idle`/`voting`/`voted`/`lost`/`not_guilty`/`guilty`)
 - `getPrisonerImage` — fallback de imagem por temporada
 
+**Status:** 9 testes passando.
+
 ### Playwright (E2E)
 
 ```bash
@@ -246,6 +248,8 @@ Cobre 8 cenários:
 6. Votar registra e mostra feedback
 7. `Esc` fecha o modal
 8. Voto persiste após reload
+
+**Status:** 8 testes passando em ~14s.
 
 ---
 
@@ -301,7 +305,18 @@ MVP completo. Todas as etapas de 0 a 8 concluídas:
 
 ## 📄 Licença
 
-MIT. Veja [LICENSE](LICENSE) para detalhes.
+O **código** deste projeto está licenciado sob a [MIT License](LICENSE). Veja o arquivo [LICENSE](LICENSE) para detalhes.
+
+**⚠️ Aviso de direitos autorais:**
+
+O nome "MILGRAM", os personagens, ilustrações, músicas, logotipos e demais elementos da obra original são propriedade de seus respectivos criadores e detentores de direitos:
+
+- **DECO\*27** (música)
+- **OTOIRO** (produção de vídeo)
+- **山中拓也** (roteiro)
+- **ミルグラム管理委員会** (comitê de gestão)
+
+Este é um **projeto pessoal de fã**, sem fins comerciais. A licença MIT se aplica **apenas ao código-fonte** deste repositório, não ao conteúdo da obra MILGRAM.
 
 ---
 
