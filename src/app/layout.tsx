@@ -1,10 +1,23 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
+import { Inter, Noto_Sans_JP } from "next/font/google";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import "./globals.css";
 
-// Cada página define seu próprio <title> completo (PROMPT §6.1); este é só o padrão.
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const notoSansJP = Noto_Sans_JP({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-noto-jp",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "MILGRAM | Votação",
   description: "Julgue os 10 prisioneiros do MILGRAM: perdoe ou não perdoe.",
@@ -17,8 +30,8 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="pt-br">
-      <body className="flex min-h-dvh flex-col pt-14 antialiased">
+    <html lang="pt-br" className={`${inter.variable} ${notoSansJP.variable}`}>
+      <body className="flex min-h-dvh flex-col pt-14 font-sans antialiased">
         <a
           href="#conteudo"
           className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:bg-accent focus:px-3 focus:py-2"

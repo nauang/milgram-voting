@@ -10,7 +10,6 @@
   --not-forgive: #e4007f;
 }
 
-/* Breakpoints do PROMPT §6.2: usar apenas sm (560), lg (960, desktop) e xl (1280) */
 @theme {
   --breakpoint-*: initial;
   --breakpoint-sm: 560px;
@@ -24,9 +23,7 @@
   --color-accent: var(--accent);
   --color-accent-2: var(--accent-2);
   --color-card: var(--card);
-  --font-sans:
-    "Inter", "Helvetica Neue", Helvetica, Arial, "Noto Sans JP", "Hiragino Sans", "Yu Gothic",
-    sans-serif;
+  --font-sans: var(--font-inter), var(--font-noto-jp), "Hiragino Sans", "Yu Gothic", sans-serif;
 }
 
 body {
@@ -35,8 +32,96 @@ body {
   font-family: var(--font-sans);
 }
 
-/* Foco visível (PROMPT §8.2). Nunca remover sem substituto. */
 :focus-visible {
   outline: 3px solid rgba(228, 0, 127, 0.4);
   outline-offset: 2px;
+}
+
+/* --- Glitch --- */
+@keyframes glitch-1 {
+  0%,
+  100% {
+    clip-path: inset(0 0 96% 0);
+    transform: translate(0);
+  }
+  20% {
+    clip-path: inset(20% 0 60% 0);
+    transform: translate(-2px, 1px);
+  }
+  40% {
+    clip-path: inset(50% 0 30% 0);
+    transform: translate(2px, -1px);
+  }
+  60% {
+    clip-path: inset(80% 0 5% 0);
+    transform: translate(-1px, 2px);
+  }
+  80% {
+    clip-path: inset(30% 0 50% 0);
+    transform: translate(1px, -2px);
+  }
+}
+
+@keyframes glitch-2 {
+  0%,
+  100% {
+    clip-path: inset(50% 0 30% 0);
+    transform: translate(0);
+  }
+  20% {
+    clip-path: inset(10% 0 70% 0);
+    transform: translate(2px, -1px);
+  }
+  40% {
+    clip-path: inset(60% 0 20% 0);
+    transform: translate(-2px, 1px);
+  }
+  60% {
+    clip-path: inset(30% 0 40% 0);
+    transform: translate(1px, -2px);
+  }
+  80% {
+    clip-path: inset(70% 0 10% 0);
+    transform: translate(-1px, 2px);
+  }
+}
+
+.glitch {
+  position: relative;
+  color: var(--fg);
+}
+
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.glitch:hover::before,
+.glitch:hover::after,
+.glitch:focus-visible::before,
+.glitch:focus-visible::after {
+  opacity: 1;
+}
+
+.glitch::before {
+  color: #ff003c;
+  animation: glitch-1 0.4s steps(2) infinite;
+  mix-blend-mode: screen;
+}
+
+.glitch::after {
+  color: #00ffff;
+  animation: glitch-2 0.4s steps(2) infinite;
+  mix-blend-mode: screen;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glitch::before,
+  .glitch::after {
+    display: none !important;
+  }
 }
