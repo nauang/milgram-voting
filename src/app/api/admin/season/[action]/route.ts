@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { TOTAL_SEASONS } from "@/lib/constants";
 import { prisma } from "@/lib/db";
 import { calculateVerdict } from "@/lib/verdict";
+import { crossOriginResponse, isSameOriginRequest } from "@/lib/csrf";
 
 const EXPECTED_PRISONER_COUNT = 10;
 
@@ -59,6 +60,10 @@ interface RouteContext {
 }
 
 export async function POST(request: NextRequest, context: RouteContext) {
+  if (!isSameOriginRequest(request)) {
+    return crossOriginResponse();
+  }
+
   const session = await auth();
   if (!session) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
