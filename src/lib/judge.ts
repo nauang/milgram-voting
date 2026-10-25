@@ -1,10 +1,10 @@
-import { createHash } from "node:crypto";
 import { cache } from "react";
 import { prisma } from "@/lib/db";
 import { getPrisonerImage } from "@/lib/prisoner-image";
 import { calculatePrisonerState } from "@/lib/prisoner-state";
 import { getCurrentSeason } from "@/lib/season";
 import { getVisitorCookie } from "@/lib/voter";
+import { buildVoterKey } from "@/lib/voter-key";
 import {
   seasonStatusSchema,
   verdictSchema,
@@ -27,9 +27,7 @@ async function getVotedPrisonerIds(): Promise<ReadonlySet<number>> {
     return new Set<number>();
   }
 
-  const voterKey = createHash("sha256")
-    .update(`${cookieId}:${process.env.VOTER_SALT ?? "dev-salt-change-me"}`)
-    .digest("hex");
+  const voterKey = buildVoterKey(cookieId);
 
   const limit24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
   const recentVotes = await prisma.vote.findMany({

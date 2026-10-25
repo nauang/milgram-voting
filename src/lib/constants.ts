@@ -8,3 +8,6 @@ export const COPYRIGHT_TEXT = "©ミルグラム管理委員会";
 
 // Troque pelo contato real do grupo antes da entrega
 export const CONTACT_EMAIL = "contato@example.com";
+
+/** Janela da regra "1 voto por prisioneiro por visitante" (PROMPT §2). */
+export const VOTE_WINDOW_MS = 24 * 60 * 60 * 1000;
