@@ -7,7 +7,7 @@ interface ResultBarProps {
 
 export function ResultBar({ label, count, percent, tone }: ResultBarProps) {
   const barClass = tone === "forgive" ? "bg-white" : "bg-accent";
-  const textClass = tone === "forgive" ? "text-white" : "text-accent";
+  const textClass = tone === "forgive" ? "text-white" : "text-accent-fg";
 
   return (
     <div className="flex flex-col gap-1">

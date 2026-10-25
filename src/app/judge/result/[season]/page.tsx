@@ -111,7 +111,7 @@ export default async function ResultPage({ params }: PageProps) {
       </section>
 
       <p className="mt-8 text-center text-sm">
-        <a href="/judge" className="underline hover:text-accent">
+        <a href="/judge" className="underline hover:text-accent-fg">
           ← Voltar para a votação
         </a>
       </p>

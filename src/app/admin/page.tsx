@@ -46,7 +46,7 @@ export default async function AdminPage() {
         >
           <button
             type="submit"
-            className="border border-white/20 px-4 py-2 text-sm hover:border-accent hover:text-accent"
+            className="border border-white/20 px-4 py-2 text-sm hover:border-accent hover:text-accent-fg"
           >
             Sair
           </button>
@@ -98,7 +98,7 @@ export default async function AdminPage() {
                     <td className="py-2 text-white/60">No.{String(p.number).padStart(2, "0")}</td>
                     <td className="py-2">{p.nickname}</td>
                     <td className="py-2 text-right text-white/80">{c.forgive}</td>
-                    <td className="py-2 text-right text-accent">{c.notForgive}</td>
+                    <td className="py-2 text-right text-accent-fg">{c.notForgive}</td>
                     <td className="py-2 text-right font-bold">{c.forgive + c.notForgive}</td>
                   </tr>
                 );

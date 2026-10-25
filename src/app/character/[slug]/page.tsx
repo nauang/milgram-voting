@@ -70,12 +70,12 @@ export default async function CharacterPage({ params }: PageProps) {
   return (
     <main id="conteudo" className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
       <nav aria-label="Breadcrumb" className="mb-6 text-xs text-white/60">
-        <Link href="/character" className="underline hover:text-accent">
+        <Link href="/character" className="underline hover:text-accent-fg">
           ← Todos os prisioneiros
         </Link>
       </nav>
 
-      <article className="md:grid-cols-2 grid gap-8">
+      <article className="grid gap-8 md:grid-cols-2">
         {/* Imagem */}
         <div>
           <figure className="relative aspect-[3/4] w-full overflow-hidden border border-white/20">
@@ -99,7 +99,7 @@ export default async function CharacterPage({ params }: PageProps) {
         {/* Info */}
         <div className="flex flex-col gap-4">
           <div>
-            <p className="text-sm font-bold tracking-widest text-accent">{numberLabel}</p>
+            <p className="text-sm font-bold tracking-widest text-accent-fg">{numberLabel}</p>
             <GlitchText
               as="h1"
               className="mt-2 text-3xl font-bold tracking-[0.1em] uppercase lg:text-4xl"
@@ -133,7 +133,7 @@ export default async function CharacterPage({ params }: PageProps) {
                       r.verdict === "not_guilty"
                         ? "text-white"
                         : r.verdict === "guilty"
-                          ? "text-accent"
+                          ? "text-accent-fg"
                           : "text-white/60"
                     }
                   >

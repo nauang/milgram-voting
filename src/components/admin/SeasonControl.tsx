@@ -170,7 +170,7 @@ export function SeasonControl({ seasons }: SeasonControlProps) {
       </div>
 
       {error && (
-        <p role="alert" className="text-sm text-accent">
+        <p role="alert" className="text-sm text-accent-fg">
           {error}
         </p>
       )}

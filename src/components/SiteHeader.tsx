@@ -12,17 +12,17 @@ export function SiteHeader() {
         <nav aria-label="Principal">
           <ul className="flex items-center gap-4 text-[0.7rem] tracking-wider uppercase lg:gap-6 lg:text-xs">
             <li className="hidden sm:block">
-              <Link href="/" className="inline-block py-3 hover:text-accent">
+              <Link href="/" className="inline-block py-3 hover:text-accent-fg">
                 Início
               </Link>
             </li>
             <li>
-              <Link href="/judge" className="inline-block py-3 hover:text-accent">
+              <Link href="/judge" className="inline-block py-3 hover:text-accent-fg">
                 Julgamento
               </Link>
             </li>
             <li>
-              <Link href="/character" className="inline-block py-3 hover:text-accent">
+              <Link href="/character" className="inline-block py-3 hover:text-accent-fg">
                 Personagens
               </Link>
             </li>

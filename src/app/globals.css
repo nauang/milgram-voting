@@ -8,6 +8,7 @@
   --card: #1a1a1a;
   --forgive: #ffffff;
   --not-forgive: #e4007f;
+  --accent-text: #ff2d95; /* magenta para TEXTO: passa AA em #000 e em #1a1a1a */
 }
 
 @theme {
@@ -25,6 +26,7 @@
   --color-accent-2: var(--accent-2);
   --color-card: var(--card);
   --font-sans: var(--font-inter), var(--font-noto-jp), "Hiragino Sans", "Yu Gothic", sans-serif;
+  --color-accent-fg: var(--accent-text);
 }
 
 html {

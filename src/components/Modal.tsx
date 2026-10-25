@@ -103,7 +103,7 @@ export function Modal({ prisoner, isOpen, status, errorMessage, onClose, onVote 
                       <VoteDiamond choice="not_forgive" disabled={false} onClick={onVote} />
                     </div>
                     {status === "error" && errorMessage && (
-                      <p role="alert" className="mt-4 text-sm text-accent">
+                      <p role="alert" className="mt-4 text-sm text-accent-fg">
                         {errorMessage}
                       </p>
                     )}
@@ -111,7 +111,9 @@ export function Modal({ prisoner, isOpen, status, errorMessage, onClose, onVote 
                 ) : status === "submitting" ? (
                   <p className="mt-6 animate-pulse text-sm text-white/70">Enviando voto...</p>
                 ) : (
-                  <p className="mt-6 text-lg font-bold text-accent">投票済み / Voto registrado</p>
+                  <p className="mt-6 text-lg font-bold text-accent-fg">
+                    投票済み / Voto registrado
+                  </p>
                 )}
               </div>
             </motion.div>

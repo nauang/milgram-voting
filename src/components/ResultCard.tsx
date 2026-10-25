@@ -23,8 +23,8 @@ export function ResultCard({ prisoner, stats, seasonNumber, priority = false }: 
   const numberLabel = formatPrisonerNumber(prisoner.number);
 
   return (
-    <article className="md:flex-row md:items-start md:gap-6 flex flex-col gap-4 border border-white/20 bg-card p-4">
-      <div className="md:w-40 relative aspect-[3/4] w-full shrink-0">
+    <article className="flex flex-col gap-4 border border-white/20 bg-card p-4 md:flex-row md:items-start md:gap-6">
+      <div className="relative aspect-[3/4] w-full shrink-0 md:w-40">
         {prisoner.imageUrl ? (
           <Image
             src={prisoner.imageUrl}
@@ -44,7 +44,7 @@ export function ResultCard({ prisoner, stats, seasonNumber, priority = false }: 
       <div className="flex flex-1 flex-col gap-3">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <div>
-            <p className="text-xs font-bold tracking-widest text-accent">{numberLabel}</p>
+            <p className="text-xs font-bold tracking-widest text-accent-fg">{numberLabel}</p>
             <h3 className="text-xl font-bold">{prisoner.nickname}</h3>
             <p className="text-xs text-white/60">{prisoner.fullName}</p>
           </div>

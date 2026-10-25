@@ -60,12 +60,12 @@ export default async function CharacterListPage() {
                         Sem imagem
                       </div>
                     )}
-                    <figcaption className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/95 to-transparent px-3 pt-8 pb-2 text-xs font-bold tracking-[0.15em] text-accent">
+                    <figcaption className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/95 to-transparent px-3 pt-8 pb-2 text-xs font-bold tracking-[0.15em] text-accent-fg">
                       {numberLabel}
                     </figcaption>
                   </figure>
                   <div className="p-3">
-                    <h3 className="text-base font-bold tracking-wide group-hover:text-accent">
+                    <h3 className="text-base font-bold tracking-wide group-hover:text-accent-fg">
                       {prisoner.nickname}
                     </h3>
                     <p className="text-xs text-white/70">{prisoner.fullName}</p>
