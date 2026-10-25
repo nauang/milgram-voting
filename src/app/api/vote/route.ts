@@ -4,6 +4,7 @@ import { checkRateLimit, getClientIp, hashIdentifier, rateLimitedResponse } from
 import { ensureVisitorCookie } from "@/lib/voter";
 import { buildVoterKey } from "@/lib/voter-key";
 import { voteBodySchema } from "@/types/domain";
+import { crossOriginResponse, isSameOriginRequest } from "@/lib/csrf";
 
 const VOTE_WINDOW_MS = 24 * 60 * 60 * 1000;
 
@@ -35,6 +36,9 @@ interface VotingSeasonRow {
 export async function POST(request: NextRequest) {
   try {
     // 0. (ITEM 3) A verificação de Origin/CSRF entra aqui, antes de tudo.
+    if (!isSameOriginRequest(request)) {
+      return crossOriginResponse();
+    }
 
     // 1. Corpo: JSON malformado é erro do cliente (400), nunca 500.
     const rawBody: unknown = await request.json().catch(() => null);
