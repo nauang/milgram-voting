@@ -1,9 +1,10 @@
 import { createHash, randomUUID } from "node:crypto";
 import { cookies } from "next/headers";
 import type { NextRequest, NextResponse } from "next/server";
+import { isValidVisitorId } from "@/lib/voter-key";
 
-const COOKIE_NAME = "milgram_vid";
-const COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 ano
+export const VISITOR_COOKIE_NAME = "milgram_vid";
+export const VISITOR_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365; // 1 ano
 
 /**
  * Gera o voterKey a partir do cookie + IP + salt.
@@ -31,23 +32,23 @@ export function extractIp(request: NextRequest): string {
  */
 export async function getVisitorCookie(): Promise<string | null> {
   const cookieStore = await cookies();
-  return cookieStore.get(COOKIE_NAME)?.value ?? null;
+  return cookieStore.get(VISITOR_COOKIE_NAME)?.value ?? null;
 }
 
 /**
- * Garante que o cookie do visitante exista. Se não existir, cria um.
+ * Garante que o cookie do visitante exista. Se não existir (ou for inválido), cria um.
  * Usado no POST /api/vote.
  */
 export function ensureVisitorCookie(request: NextRequest, response: NextResponse): string {
-  const existing = request.cookies.get(COOKIE_NAME)?.value;
-  if (existing) return existing;
+  const existing = request.cookies.get(VISITOR_COOKIE_NAME)?.value;
+  if (existing && isValidVisitorId(existing)) return existing;
 
   const newId = randomUUID();
-  response.cookies.set(COOKIE_NAME, newId, {
+  response.cookies.set(VISITOR_COOKIE_NAME, newId, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
-    maxAge: COOKIE_MAX_AGE,
+    maxAge: VISITOR_COOKIE_MAX_AGE_SECONDS,
     path: "/",
   });
   return newId;

@@ -1,87 +1,140 @@
-import { createHash } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { voteBodySchema } from "@/types/domain";
+import { checkRateLimit, getClientIp, hashIdentifier, rateLimitedResponse } from "@/lib/rate-limit";
 import { ensureVisitorCookie } from "@/lib/voter";
+import { buildVoterKey } from "@/lib/voter-key";
+import { voteBodySchema } from "@/types/domain";
 
-// Rate limit em memória (dev). Em produção, usar Upstash (§8.1)
-const rateLimitMap = new Map<string, { count: number; lastReset: number }>();
-const RATE_LIMIT = 10;
-const WINDOW_MS = 60 * 60 * 1000; // 1 hora
+const VOTE_WINDOW_MS = 24 * 60 * 60 * 1000;
+
+type VoteRejectionCode = "SEASON_CLOSED" | "PRISONER_NOT_FOUND" | "ALREADY_VOTED";
+
+const REJECTIONS: Record<VoteRejectionCode, { status: number; message: string }> = {
+  SEASON_CLOSED: { status: 403, message: "A votação está encerrada." },
+  PRISONER_NOT_FOUND: { status: 404, message: "Prisioneiro não encontrado." },
+  ALREADY_VOTED: { status: 409, message: "Você já votou neste prisioneiro hoje." },
+};
+
+/** Lançada DENTRO da transação: provoca o rollback e vira uma resposta HTTP tipada. */
+class VoteRejection extends Error {
+  readonly code: VoteRejectionCode;
+  readonly retryAt?: Date;
+
+  constructor(code: VoteRejectionCode, retryAt?: Date) {
+    super(code);
+    this.code = code;
+    this.retryAt = retryAt;
+  }
+}
+
+interface VotingSeasonRow {
+  id: number;
+  endsAt: Date | null;
+}
 
 export async function POST(request: NextRequest) {
   try {
-    // Preparar a resposta (para poder setar o cookie)
-    const response = NextResponse.json({ success: true }, { status: 201 });
+    // 0. (ITEM 3) A verificação de Origin/CSRF entra aqui, antes de tudo.
 
-    // 1. Garantir cookie do visitante
-    const cookieId = ensureVisitorCookie(request, response);
-
-    // 2. IP (para rate-limit)
-    const ip =
-      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-      request.headers.get("x-real-ip") ??
-      "127.0.0.1";
-
-    // 3. Rate limit em memória
-    const now = Date.now();
-    const rateData = rateLimitMap.get(ip) ?? { count: 0, lastReset: now };
-    if (now - rateData.lastReset > WINDOW_MS) {
-      rateData.count = 0;
-      rateData.lastReset = now;
-    }
-    if (rateData.count >= RATE_LIMIT) {
-      return NextResponse.json({ error: "Muitas tentativas. Tente mais tarde." }, { status: 429 });
-    }
-    rateData.count++;
-    rateLimitMap.set(ip, rateData);
-
-    // 4. Validar body
-    const body = await request.json();
-    const parsed = voteBodySchema.safeParse(body);
+    // 1. Corpo: JSON malformado é erro do cliente (400), nunca 500.
+    const rawBody: unknown = await request.json().catch(() => null);
+    const parsed = voteBodySchema.safeParse(rawBody);
     if (!parsed.success) {
-      return NextResponse.json({ error: "Dados inválidos." }, { status: 400 });
+      return NextResponse.json(
+        { code: "INVALID_BODY", error: "Dados inválidos." },
+        { status: 400 },
+      );
     }
     const { prisonerId, choice } = parsed.data;
 
-    // 5. Temporada ativa
-    const season = await prisma.season.findFirst({ where: { status: "voting" } });
-    if (!season) {
-      return NextResponse.json({ error: "A votação está encerrada." }, { status: 403 });
+    // 2. Rate limit, antes de qualquer consulta ao banco. Dois limites:
+    //    - tentativas por IP/hora (anti-bot, PROMPT §8.1);
+    //    - tentativas por IP+prisioneiro/24h (impede burlar a regra de 24h descartando o cookie).
+    const ipHash = hashIdentifier(getClientIp(request.headers));
+
+    const attempts = await checkRateLimit("voteAttempts", ipHash);
+    if (!attempts.allowed) {
+      return rateLimitedResponse(attempts.retryAfterSeconds);
+    }
+    const perPrisoner = await checkRateLimit("votePerPrisoner", `${ipHash}:${prisonerId}`);
+    if (!perPrisoner.allowed) {
+      return rateLimitedResponse(perPrisoner.retryAfterSeconds);
     }
 
-    // 6. Calcular voterKey (deve ser IGUAL ao de judge.ts)
-    const voterKey = createHash("sha256")
-      .update(`${cookieId}:${process.env.VOTER_SALT ?? "dev-salt-change-me"}`)
-      .digest("hex");
+    // 3. Identidade anônima (o cookie só é gravado na resposta de sucesso)
+    const response = NextResponse.json({ success: true, prisonerId, choice }, { status: 201 });
+    const cookieId = ensureVisitorCookie(request, response);
+    const voterKey = buildVoterKey(cookieId);
 
-    // 7. Regra de 24h
-    const limit24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const recentVote = await prisma.vote.findFirst({
-      where: {
-        voterKey,
-        prisonerId,
-        createdAt: { gte: limit24h },
-      },
-    });
+    // 4. Tudo ou nada, com trava de linha (ver encerramento-temporada.md §5)
+    await prisma.$transaction(async (tx) => {
+      // 4.1 Trava COMPARTILHADA na temporada em votação (FOR SHARE).
+      //     - Se o admin está fechando agora, o UPDATE dele segura a linha: esta consulta ESPERA
+      //       o commit, reavalia o WHERE, vê "closed" e devolve 0 linhas -> SEASON_CLOSED.
+      //     - Se este voto chegou primeiro, o UPDATE do admin espera o commit do voto, e a
+      //       contagem seguinte INCLUI o voto. Nenhum voto fica gravado fora do resultado.
+      const seasons = await tx.$queryRaw<VotingSeasonRow[]>`
+        SELECT "id", "endsAt" FROM "Season" WHERE "status" = 'voting' FOR SHARE
+      `;
+      const season = seasons[0];
+      // endsAt nulo = sem prazo (encerramento manual, decisão E3)
+      const isExpired = season?.endsAt != null && new Date(season.endsAt).getTime() <= Date.now();
+      if (!season || isExpired) {
+        throw new VoteRejection("SEASON_CLOSED");
+      }
 
-    if (recentVote) {
-      return NextResponse.json({ error: "Você já votou neste prisioneiro hoje." }, { status: 409 });
-    }
+      // 4.2 O prisioneiro existe? (sem isso, a FK estoura e vira 500)
+      const prisoner = await tx.prisoner.findUnique({
+        where: { id: prisonerId },
+        select: { id: true },
+      });
+      if (!prisoner) {
+        throw new VoteRejection("PRISONER_NOT_FOUND");
+      }
 
-    // 8. Gravar voto
-    await prisma.vote.create({
-      data: {
-        prisonerId,
-        seasonId: season.id,
-        choice,
-        voterKey,
-      },
+      // 4.3 Serializa pedidos do MESMO visitante para o MESMO prisioneiro. A janela de 24h é
+      //     móvel, então um índice único não resolve; o lock é liberado sozinho no fim da
+      //     transação. Ordem fixa dos locks (temporada, depois visitante) evita deadlock.
+      await tx.$executeRaw`
+        SELECT pg_advisory_xact_lock(hashtext(${voterKey}::text), ${prisonerId}::int)
+      `;
+
+      // 4.4 Regra de negócio: 1 voto por prisioneiro a cada 24h
+      const recentVote = await tx.vote.findFirst({
+        where: {
+          voterKey,
+          prisonerId,
+          createdAt: { gte: new Date(Date.now() - VOTE_WINDOW_MS) },
+        },
+        orderBy: { createdAt: "desc" },
+        select: { createdAt: true },
+      });
+      if (recentVote) {
+        throw new VoteRejection(
+          "ALREADY_VOTED",
+          new Date(recentVote.createdAt.getTime() + VOTE_WINDOW_MS),
+        );
+      }
+
+      // 4.5 Gravação
+      await tx.vote.create({
+        data: { prisonerId, seasonId: season.id, choice, voterKey },
+      });
     });
 
     return response;
   } catch (error) {
+    if (error instanceof VoteRejection) {
+      const { status, message } = REJECTIONS[error.code];
+      return NextResponse.json(
+        { code: error.code, error: message, retryAt: error.retryAt?.toISOString() },
+        { status },
+      );
+    }
     console.error("Erro no POST /api/vote:", error);
-    return NextResponse.json({ error: "Erro interno do servidor." }, { status: 500 });
+    return NextResponse.json(
+      { code: "INTERNAL", error: "Erro interno do servidor." },
+      { status: 500 },
+    );
   }
 }

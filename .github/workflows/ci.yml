@@ -18,32 +18,91 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-
-      - name: Install
-        run: npm ci
-
-      - name: Prisma generate
-        run: npx prisma generate
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Typecheck
-        run: npm run typecheck
-
-      - name: Unit tests
-        run: npm run test
-
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test
       - name: Build
         run: npm run build
         env:
-          # Variáveis fictícias para o build não quebrar no CI
           DATABASE_URL: postgresql://fake:fake@localhost:5432/fake
+          DIRECT_URL: postgresql://fake:fake@localhost:5432/fake
           AUTH_SECRET: ci-secret-nao-usar-em-producao
           VOTER_SALT: ci-salt-nao-usar-em-producao
+
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: ci
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: milgram_test
+        ports: [5432:5432]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/milgram_test
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/milgram_test
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/milgram_test
+      CONFIRM_TEST_DB_WIPE: "yes"
+      VOTER_SALT: ci-salt-nao-usar-em-producao
+      AUTH_SECRET: ci-secret-nao-usar-em-producao
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npx prisma migrate deploy
+      - run: npx prisma db seed
+      - run: npm run test:integration
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: ci
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: milgram_test
+        ports: [5432:5432]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/milgram_test
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/milgram_test
+      VOTER_SALT: ci-salt-nao-usar-em-producao
+      AUTH_SECRET: ci-secret-nao-usar-em-producao
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npx prisma migrate deploy
+      - run: npx prisma db seed
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e

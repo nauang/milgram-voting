@@ -56,3 +56,5 @@ Thumbs.db
 # banco SQLite de dev (qualquer local)
 *.db
 *.db-journal
+/certs/
+/certs/
