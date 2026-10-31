@@ -17,6 +17,13 @@ jobs:
   ci:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # Obrigatórias desde o npm ci: o postinstall executa prisma generate.
+    # URLs fictícias; nenhuma conexão real é feita neste job.
+    env:
+      DATABASE_URL: postgresql://fake:fake@127.0.0.1:5432/fake
+      DIRECT_URL: postgresql://fake:fake@127.0.0.1:5432/fake
+      AUTH_SECRET: ci-secret-nao-usar-em-producao
+      VOTER_SALT: ci-salt-nao-usar-em-producao
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -30,11 +37,6 @@ jobs:
       - run: npm run test
       - name: Build
         run: npm run build
-        env:
-          DATABASE_URL: postgresql://fake:fake@localhost:5432/fake
-          DIRECT_URL: postgresql://fake:fake@localhost:5432/fake
-          AUTH_SECRET: ci-secret-nao-usar-em-producao
-          VOTER_SALT: ci-salt-nao-usar-em-producao
 
   integration:
     runs-on: ubuntu-latest
