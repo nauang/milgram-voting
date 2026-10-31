@@ -35,9 +35,12 @@ test.describe("/judge — fluxo de votação", () => {
 
     await page.getByRole("button", { name: /^Perdoar este prisioneiro$/ }).click();
 
-    // Escopar ao dialog para não pegar o badge "Voto registrado" do card
+    // Seleciona a confirmação exata dentro do status do modal,
+    // sem confundir o texto japonês ou os badges dos cartões.
     const modal = page.getByRole("dialog");
-    await expect(modal.getByText(/投票済み|Voto registrado/)).toBeVisible({ timeout: 5000 });
+    await expect(
+      modal.getByRole("status").getByText("Voto registrado", { exact: true }),
+    ).toBeVisible({ timeout: 5000 });
   });
 
   test("Esc fecha o modal", async ({ page }) => {

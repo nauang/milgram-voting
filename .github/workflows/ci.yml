@@ -90,8 +90,13 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/milgram_test
-      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/milgram_test
+      # Referências fictícias e diferentes do banco de testes para
+      # permitir que o Playwright detecte uma configuração insegura.
+      DATABASE_URL: postgresql://dummy:dummy@127.0.0.1:65432/nao_utilizar
+      DIRECT_URL: postgresql://dummy:dummy@127.0.0.1:65432/nao_utilizar
+      TEST_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/milgram_test
+      TEST_DIRECT_URL: postgresql://postgres:postgres@127.0.0.1:5432/milgram_test
+      CONFIRM_TEST_DB_WIPE: "yes"
       VOTER_SALT: ci-salt-nao-usar-em-producao
       AUTH_SECRET: ci-secret-nao-usar-em-producao
     steps:
@@ -102,7 +107,27 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx prisma generate
-      - run: npx prisma migrate deploy
-      - run: npx prisma db seed
+      - name: Aplicar migração no PostgreSQL E2E
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ env.TEST_DATABASE_URL }}
+          DIRECT_URL: ${{ env.TEST_DIRECT_URL }}
+      - name: Popular somente o PostgreSQL E2E
+        run: npx prisma db seed
+        env:
+          DATABASE_URL: ${{ env.TEST_DATABASE_URL }}
+          DIRECT_URL: ${{ env.TEST_DIRECT_URL }}
+      - name: Criar credenciais administrativas descartáveis
+        shell: bash
+        run: |
+          password="$(openssl rand -hex 24)"
+          echo "::add-mask::$password"
+          password_hash="$(printf '%s' "$password" | npx tsx scripts/hash-password.ts)"
+          echo "::add-mask::$password_hash"
+          {
+            echo "E2E_ADMIN_EMAIL=e2e-admin@example.invalid"
+            echo "E2E_ADMIN_PASSWORD=$password"
+            echo "E2E_ADMIN_PASSWORD_HASH=$password_hash"
+          } >> "$GITHUB_ENV"
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
