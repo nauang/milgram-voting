@@ -9,7 +9,7 @@ export function SiteFooter() {
           {CONTACT_EMAIL}
         </a>
       </address>
-      <p className="mt-2">Projeto acadêmico de fã. Não é um site oficial.</p>
+      <p className="mt-2">Projeto feito por fã. Não é um site oficial</p>
       <small className="mt-2 block">{COPYRIGHT_TEXT}</small>
     </footer>
   );
