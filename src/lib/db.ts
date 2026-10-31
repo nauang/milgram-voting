@@ -94,6 +94,9 @@ function createPrismaClient(): PrismaClient {
 
   const adapter = new PrismaPg({
     connectionString: url.toString(),
+    // Limita o pool por instância serverless para reduzir a pressão no Supabase.
+    max: 1,
+    connectionTimeoutMillis: 10_000,
     ...(useTls
       ? {
           ssl: {
