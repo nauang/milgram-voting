@@ -1,323 +1,216 @@
 # MILGRAM Voting
 
-Página de votação inspirada no projeto MILGRAM (milgram.jp). Visitantes anônimos julgam 10 prisioneiros, temporada por temporada. Ao final de cada temporada, os votos são apurados e o resultado determina o destino dos personagens.
+Aplicação web de fãs, não oficial e sem fins comerciais, inspirada no projeto **MILGRAM**. Visitantes participam de julgamentos de dez prisioneiros ao longo de três temporadas, escolhendo entre **perdoar** e **não perdoar**. A interface está em português e inclui resultados, histórico dos personagens e um painel administrativo.
 
-## 📋 Sumário
+> **Aviso:** este site não representa nem substitui a votação oficial do MILGRAM.
 
-- [Problema e público-alvo](#-problema-e-público-alvo)
-- [Tecnologias](#-tecnologias)
-- [Estrutura de pastas](#-estrutura-de-pastas)
-- [Como rodar](#-como-rodar)
-- [Variáveis de ambiente](#-variáveis-de-ambiente)
-- [Rotas e endpoints](#-rotas-e-endpoints)
-- [Scripts disponíveis](#-scripts-disponíveis)
-- [Testes](#-testes)
-- [Acessibilidade e SEO](#-acessibilidade-e-seo)
-- [Integrantes](#-integrantes)
-- [Status](#-status)
-- [Licença](#-licença)
+## Tecnologias
 
----
+| Área                 | Tecnologia                                                                    |
+| -------------------- | ----------------------------------------------------------------------------- |
+| Interface e servidor | Next.js 16 (App Router), React 19, TypeScript                                 |
+| Estilos              | Tailwind CSS 4 e fontes MILGRAM locais                                        |
+| Banco de dados       | PostgreSQL, Prisma 7 e `@prisma/adapter-pg`                                   |
+| Imagens              | Supabase Storage e processamento com Sharp                                    |
+| Autenticação         | Auth.js / NextAuth 5, credenciais e sessão JWT                                |
+| Segurança            | Validação com Zod, proteção CSRF, rate limiting com Upstash Redis em produção |
+| Testes               | Vitest (unitários e integração), Playwright (E2E)                             |
+| Qualidade            | ESLint, Prettier, GitHub Actions                                              |
 
-## 🎯 Problema e público-alvo
+## Funcionalidades
 
-Fãs do projeto MILGRAM precisam de uma forma simples de participar da votação oficial (perdoar / não perdoar) sem depender do app mobile. O público são os fãs brasileiros que acompanham a obra e querem uma experiência web acessível e em português.
+- Página inicial com status da temporada atual e destaques dos personagens.
+- Votação por prisioneiro, com limitação de frequência e identificação pseudonimizada do visitante.
+- Três temporadas, cada uma com imagens próprias dos dez prisioneiros.
+- Apuração de votos e apresentação de vereditos por temporada.
+- Perfil de cada personagem com histórico de julgamentos.
+- Painel administrativo para iniciar temporadas, encerrar votações, iniciar a temporada seguinte ou aguardar.
+- Upload administrativo de imagens PNG/JPEG/WebP com validações, processamento e armazenamento no Supabase.
+- Redefinição administrativa de temporadas, votos e resultados, mediante frase de confirmação. **Imagens e informações dos prisioneiros são preservadas.**
 
-A página replica o fluxo oficial:
+## Pré-requisitos
 
-1. **Votação** — o visitante vota `forgive` (赦す) ou `not_forgive` (赦さない) em cada prisioneiro, 1× a cada 24h.
-2. **Apuração** — o admin encerra a temporada e o sistema conta os votos, define o veredito (`not_guilty` / `guilty` / `lost`) e inicia a próxima temporada.
-3. **Imagens por temporada** — cada prisioneiro tem 3 imagens (uma por temporada); a troca é atômica junto com a mudança de temporada.
+- Node.js 20.9 ou superior (recomendado Node.js 22).
+- npm e PostgreSQL acessível, localmente ou pelo Supabase.
+- Para upload de imagens, um projeto Supabase configurado.
+- Para produção, Upstash Redis configurado para o rate limiting distribuído.
 
----
-
-## 🛠️ Tecnologias
-
-| Camada          | Stack                                                   |
-| --------------- | ------------------------------------------------------- |
-| **Framework**   | Next.js 16 (App Router, React Server Components)        |
-| **Linguagem**   | TypeScript (strict)                                     |
-| **Estilização** | TailwindCSS v4 (mobile-first, breakpoints customizados) |
-| **Animação**    | Framer Motion                                           |
-| **Banco**       | Prisma 7 + SQLite (dev) / Postgres (prod)               |
-| **Auth**        | NextAuth (credenciais, sessão via cookie httpOnly)      |
-| **Validação**   | Zod (schemas compartilhados entre API e front)          |
-| **Testes unit** | Vitest                                                  |
-| **Testes E2E**  | Playwright                                              |
-| **Qualidade**   | ESLint, Prettier, Husky, lint-staged                    |
-| **CI/CD**       | GitHub Actions + Vercel                                 |
-
----
-
-## 📁 Estrutura de pastas
-
-```
-.
-├── docs/
-│   ├── diagramas/          # ER, fluxo de voto, encerramento
-│   ├── evidencias/         # Relatórios Lighthouse, prints
-│   └── prototipo/          # Wireframes
-├── prisma/
-│   ├── migrations/         # Histórico de migrations
-│   ├── schema.prisma       # Schema do banco
-│   └── seed.ts             # Popula 10 prisioneiros + 3 temporadas
-├── public/                 # Assets estáticos
-├── reference/              # Capturas do site oficial (NÃO versionado)
-├── src/
-│   ├── app/                # Rotas (App Router)
-│   │   ├── admin/          # Painel admin (protegido)
-│   │   ├── api/            # API Routes (vote, admin, auth)
-│   │   ├── character/      # Lista + individual de personagens
-│   │   ├── judge/          # Votação + resultados
-│   │   ├── globals.css
-│   │   └── layout.tsx
-│   ├── components/         # Componentes React
-│   ├── lib/                # Lógica de negócio
-│   │   ├── db.ts
-│   │   ├── judge.ts
-│   │   ├── prisoner-image.ts
-│   │   ├── prisoner-state.ts
-│   │   ├── result.ts
-│   │   ├── season.ts
-│   │   ├── vote-check.ts
-│   │   └── voter.ts
-│   ├── types/              # Tipos + schemas Zod
-│   └── utils/              # Helpers (formatação)
-├── tests/
-│   ├── unit/               # Vitest
-│   └── e2e/                # Playwright
-├── prisma.config.ts
-├── next.config.ts
-├── playwright.config.ts
-├── tsconfig.json
-├── eslint.config.mjs
-├── .prettierrc
-└── package.json
-```
-
----
-
-## 🚀 Como rodar
-
-### Pré-requisitos
-
-- **Node.js 20.9+** (recomendado 22 LTS)
-- **npm 10+**
-
-### Passo a passo
+## Instalação
 
 ```bash
-# 1. Clone o repositório
 git clone https://github.com/nauang/milgram-voting.git
 cd milgram-voting
+npm ci
+```
 
-# 2. Instale as dependências
-npm install
+Crie `.env.local` com as variáveis apropriadas para seu ambiente. Nunca inclua credenciais reais no Git ou em arquivos ZIP compartilhados.
 
-# 3. Configure as variáveis de ambiente
-cp .env.example .env.local
-# Edite .env.local com suas credenciais (veja seção abaixo)
+### Variáveis de ambiente
 
-# 4. Prepare o banco
-npx prisma migrate dev
-npx prisma db seed
+| Variável                   | Finalidade                                                                                        |
+| -------------------------- | ------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`             | Conexão PostgreSQL utilizada pela aplicação                                                       |
+| `DIRECT_URL`               | Conexão PostgreSQL direta utilizada pelo Prisma nas migrações                                     |
+| `AUTH_SECRET`              | Segredo usado pelo Auth.js; gerar com `openssl rand -base64 32`                                   |
+| `ADMIN_EMAIL`              | Endereço de e-mail do administrador                                                               |
+| `ADMIN_PASSWORD_HASH`      | Hash scrypt da senha administrativa, gerado pelo script do projeto                                |
+| `VOTER_SALT`               | Segredo para derivar identificadores de rate limiting e votação; gerar com `openssl rand -hex 32` |
+| `SUPABASE_URL`             | URL do projeto Supabase                                                                           |
+| `SUPABASE_SECRET_KEY`      | Chave de servidor do Supabase, utilizada apenas no backend                                        |
+| `UPSTASH_REDIS_REST_URL`   | Endpoint REST do Upstash Redis, obrigatório em produção                                           |
+| `UPSTASH_REDIS_REST_TOKEN` | Token REST do Upstash Redis, obrigatório em produção                                              |
+| `NEXT_PUBLIC_SITE_URL`     | URL pública do site, usada nos metadados e no sitemap                                             |
+| `DATABASE_SSL_CA_PEM`      | Opcional: certificado CA PEM da conexão PostgreSQL; alternativa ao parâmetro `sslrootcert` na URL |
 
-# 5. Suba o servidor de desenvolvimento
+**PostgreSQL e TLS:** use uma conexão com validação de certificados. O cliente da aplicação suporta CA via `sslrootcert` na `DATABASE_URL` ou via `DATABASE_SSL_CA_PEM`. Obtenha o certificado verdadeiro no painel do Supabase e disponibilize-o no ambiente de implantação. Evite `sslmode=no-verify` e `rejectUnauthorized: false`. Configure também a conexão de migrações (`DIRECT_URL`) com TLS adequado. O arquivo de certificado não precisa ser versionado.
+
+**Senha administrativa:** o script lê a senha da entrada padrão. No Bash, utilize uma leitura sem eco na tela e sem registrar a senha no histórico:
+
+```bash
+read -rsp "Senha administrativa: " ADMIN_PLAIN_PASSWORD; echo
+printf '%s' "$ADMIN_PLAIN_PASSWORD" | npx tsx scripts/hash-password.ts
+unset ADMIN_PLAIN_PASSWORD
+```
+
+Copie o hash gerado para `ADMIN_PASSWORD_HASH`. Use uma senha com pelo menos 12 caracteres; não armazene a senha em texto simples no arquivo de ambiente.
+
+**Segurança do Redis:** em desenvolvimento/testes, o rate limiting pode usar memória local; em produção, defina as duas variáveis Upstash. Quando a verificação distribuída estiver indisponível, as operações protegidas devem falhar em vez de serem liberadas automaticamente.
+
+### Banco de dados
+
+O projeto utiliza **PostgreSQL tanto em desenvolvimento quanto em produção**. Não utiliza SQLite como banco ativo.
+
+```bash
+npm run db:generate
+npm run db:migrate
+npm run db:seed
+```
+
+Execute as migrações e o seed apenas no banco pretendido. Para produção, prefira o procedimento controlado de implantação de migrações, em vez de `migrate dev`.
+
+### Servidor local
+
+```bash
 npm run dev
 ```
 
-Abra [http://localhost:3000](http://localhost:3000) no navegador.
+Abra `http://localhost:3000`. A rota `/` possui uma página inicial própria; ela **não** redireciona automaticamente para `/judge`.
 
-O app vai redirecionar automaticamente para `/judge`.
+Para entrar no painel, acesse `/admin` (visitantes sem sessão são direcionados para `/admin/login`).
 
-### Login do admin
+## Rotas principais
 
-Acesse [http://localhost:3000/admin](http://localhost:3000/admin) — será redirecionado para `/admin/login`. Use as credenciais definidas em `ADMIN_EMAIL` e `ADMIN_PASSWORD` no `.env.local`.
-
----
-
-## 🔐 Variáveis de ambiente
-
-Copie `.env.example` para `.env.local` e preencha:
-
-| Variável                   | Descrição                                | Como gerar                         |
-| -------------------------- | ---------------------------------------- | ---------------------------------- |
-| `DATABASE_URL`             | URL do SQLite (dev) ou Postgres (prod)   | Dev: `file:./dev.db`               |
-| `ADMIN_EMAIL`              | Email do painel `/admin`                 | Você define                        |
-| `ADMIN_PASSWORD`           | Senha do painel `/admin`                 | Você define (forte!)               |
-| `AUTH_SECRET`              | Secret do NextAuth                       | `openssl rand -base64 32`          |
-| `VOTER_SALT`               | Salt do `voterKey` (hash de IP + cookie) | `openssl rand -hex 32`             |
-| `NEXTAUTH_URL`             | URL base da app                          | `http://localhost:3000`            |
-| `UPSTASH_REDIS_REST_URL`   | URL do Redis (opcional, rate-limit)      | [upstash.com](https://upstash.com) |
-| `UPSTASH_REDIS_REST_TOKEN` | Token do Redis (opcional)                | [upstash.com](https://upstash.com) |
-
-**⚠️ Atenção:** o `.env.local` **nunca** deve ser commitado. Já está no `.gitignore`.
-
----
-
-## 🌐 Rotas e endpoints
-
-### Páginas
-
-| Rota                     | Descrição                                   |
-| ------------------------ | ------------------------------------------- |
-| `/`                      | Redireciona para `/judge`                   |
-| `/judge`                 | Página principal de votação (grid + modal)  |
-| `/judge/result/[season]` | Resultado de uma temporada encerrada        |
-| `/character`             | Lista dos 10 prisioneiros                   |
-| `/character/[slug]`      | Página individual de um prisioneiro         |
-| `/admin`                 | Painel de controle (protegido por NextAuth) |
-| `/admin/login`           | Tela de login                               |
+| Rota                     | Função                          |
+| ------------------------ | ------------------------------- |
+| `/`                      | Página inicial                  |
+| `/judge`                 | Grade de prisioneiros e votação |
+| `/judge/result/[season]` | Resultado da temporada indicada |
+| `/character`             | Lista de personagens            |
+| `/character/[slug]`      | Perfil individual e histórico   |
+| `/admin/login`           | Autenticação administrativa     |
+| `/admin`                 | Painel administrativo protegido |
 
 ### API
 
-| Método     | Rota                            | Descrição                                    |
-| ---------- | ------------------------------- | -------------------------------------------- |
-| `POST`     | `/api/vote`                     | Registra um voto (`forgive` / `not_forgive`) |
-| `POST`     | `/api/admin/season/init`        | Inicia uma temporada (admin)                 |
-| `POST`     | `/api/admin/season/closeVoting` | Encerra, apura e inicia a próxima            |
-| `GET/POST` | `/api/auth/[...nextauth]`       | Login/logout NextAuth                        |
+| Método     | Rota                            | Função                                                                          |
+| ---------- | ------------------------------- | ------------------------------------------------------------------------------- |
+| `POST`     | `/api/vote`                     | Envio de voto                                                                   |
+| `GET`      | `/api/admin/csrf`               | Obtenção de token CSRF para upload administrativo                               |
+| `POST`     | `/api/admin/images`             | Upload administrativo protegido                                                 |
+| `POST`     | `/api/admin/season/init`        | Iniciar temporada                                                               |
+| `POST`     | `/api/admin/season/closeVoting` | Encerrar votação, apurar resultados e opcionalmente iniciar a próxima temporada |
+| `POST`     | `/api/admin/season/reset`       | Redefinir temporadas e excluir votos/resultados, preservando imagens            |
+| `GET/POST` | `/api/auth/[...nextauth]`       | Rotas do Auth.js                                                                |
 
-### Regras de negócio
+As operações administrativas requerem autenticação e validações adicionais. Não utilize essas APIs diretamente para testar ações destrutivas em um banco com dados que precisam ser mantidos.
 
-- **1 voto por prisioneiro a cada 24h** por visitante (identificado por cookie + IP hash).
-- Voto é registrado apenas se a temporada estiver em `status = "voting"`.
-- **Veredito**: maioria `forgive` → `not_guilty`; maioria `not_forgive` → `guilty`; empate ou zero votos → `lost`.
-- Ao encerrar a T3, o app entra em estado `finished`.
+## Regras de julgamento
 
----
+- A votação só é aceita quando a temporada estiver aberta (`voting`).
+- O voto utiliza as escolhas `forgive` e `not_forgive`.
+- O sistema verifica intervalo entre votos e aplica limites contra abuso.
+- Ao encerrar uma votação, os votos são apurados e os resultados são armazenados.
+- O administrador pode iniciar imediatamente a temporada seguinte ou deixar o julgamento aguardando.
+- Após a terceira temporada, o ciclo é concluído.
+- O reset administrativo exige a frase exata `RESETAR TEMPORADAS` e preserva os registros de imagens.
 
-## 📜 Scripts disponíveis
+## Scripts
 
 ```bash
-# Desenvolvimento
-npm run dev           # Servidor de dev (localhost:3000)
-npm run build         # Build de produção
-npm run start         # Servidor de produção
-
-# Qualidade
-npm run lint          # ESLint (zero warnings)
-npm run typecheck     # tsc --noEmit
-npm run format        # Prettier em todo o src/
-
-# Testes
-npm run test          # Vitest (unit)
-npm run test:e2e      # Playwright (E2E)
-
-# Banco de dados
-npm run db:generate   # Prisma generate
-npm run db:migrate    # Prisma migrate dev
-npm run db:seed       # Popula com 10 prisioneiros + 3 temporadas
-npm run db:reset      # Reseta o banco (⚠️ apaga dados)
+npm run dev              # Servidor de desenvolvimento
+npm run build            # Prisma generate + build Next.js
+npm run start            # Servidor de produção
+npm run lint             # ESLint sem avisos
+npm run typecheck        # Verificação TypeScript
+npm test                 # Testes unitários com Vitest
+npm run test:integration # Testes de integração com PostgreSQL isolado
+npm run test:e2e        # Testes de ponta a ponta com Playwright
+npm run db:generate      # Geração do Prisma Client
+npm run db:migrate       # Migrações em desenvolvimento
+npm run db:seed          # Seed inicial do banco
+npm run db:reset         # Redefine o banco: operação destrutiva
 ```
 
----
+## Testes e validação
 
-## 🧪 Testes
+Na validação local concluída em **31/10/2026**, foram aprovados **356 testes automatizados**, distribuídos em:
 
-### Vitest (unit)
+- **330 testes unitários**, em 24 arquivos (`npm test`).
+- **13 testes de integração**, em 2 arquivos, usando um PostgreSQL isolado (`npm run test:integration`).
+- **13 testes E2E**, em 5 arquivos, executados em conjunto com Playwright (`npm run test:e2e`).
+
+Também passaram **ESLint**, **verificação de tipos TypeScript** e **build de produção**. Os totais representam as últimas execuções informadas durante o desenvolvimento; execute novamente as verificações depois de modificar o projeto.
 
 ```bash
-npm run test
+npm run lint && npm run typecheck && npm test && npm run build
 ```
 
-Cobre:
+Os testes de integração e E2E **não** fazem parte de `npm test` e precisam de banco PostgreSQL **dedicado e descartável**. Os testes de integração alteram e removem votos e resultados; nunca aponte suas variáveis para produção.
 
-- `calculatePrisonerState` — todos os estados (`idle`/`voting`/`voted`/`lost`/`not_guilty`/`guilty`)
-- `getPrisonerImage` — fallback de imagem por temporada
-
-**Status:** 9 testes passando.
-
-### Playwright (E2E)
+Para executar o Playwright em ambiente local, prepare previamente o PostgreSQL de testes, aplique as migrações e o seed **somente nesse banco**, e defina `TEST_DATABASE_URL`, `TEST_DIRECT_URL` e `CONFIRM_TEST_DB_WIPE=yes`. O Playwright usa essas variáveis para conectar o servidor de testes ao banco isolado. Para cobrir o login administrativo, configure também credenciais exclusivas de E2E (`E2E_ADMIN_EMAIL`, `E2E_ADMIN_PASSWORD`, `E2E_ADMIN_PASSWORD_HASH`), diferentes das credenciais reais.
 
 ```bash
-# Instalar o Chromium do Playwright (primeira vez)
 npx playwright install chromium
-
-# Rodar (sobe o servidor automaticamente)
 npm run test:e2e
 ```
 
-Cobre 8 cenários:
+Para a integração com banco, utilize `DATABASE_URL` e `DIRECT_URL` apontando **explicitamente** para o banco isolado; não utilize esses comandos em um banco com votos reais.
 
-1. `/admin` redireciona para login quando não autenticado
-2. Login com credenciais corretas funciona
-3. Login com credenciais erradas falha
-4. `/judge` carrega grid com 10 prisioneiros
-5. Clicar num card abre modal com dois losangos
-6. Votar registra e mostra feedback
-7. `Esc` fecha o modal
-8. Voto persiste após reload
+A suíte automatizada não substitui testes manuais de acessibilidade, responsividade e verificação da implantação publicada.
 
-**Status:** 8 testes passando em ~14s.
+## Organização do repositório
 
----
+```text
+src/
+  app/             Páginas, layout e endpoints Next.js
+  components/      Componentes de interface e administração
+  lib/             Regras de negócio, autenticação, banco e segurança
+  types/           Tipos do domínio
+  utils/           Utilitários
+tests/
+  unit/            Testes unitários
+  integration/     Testes de integração com PostgreSQL
+  e2e/             Testes Playwright
+prisma/
+  schema.prisma    Modelos Prisma para PostgreSQL
+  migrations/      Histórico de migrações
+  seed.ts          Dados iniciais
+public/fonts/      Fontes locais MILGRAM
+scripts/            Ferramentas auxiliares
+```
 
-## ♿ Acessibilidade e SEO
+## Acessibilidade e fontes
 
-Todas as páginas principais foram auditadas com **Lighthouse**:
+O site utiliza as fontes locais MILGRAM English e MILGRAM Rune para identidade visual, além de Inter e Noto Sans JP. No `next/font/google`, `subsets: ["latin"]` seleciona o subconjunto pré-carregado; isso **não impede** o carregamento dos glifos japoneses por meio dos arquivos Unicode correspondentes.
 
-| Página              | Accessibility | Best Practices | SEO     |
-| ------------------- | ------------- | -------------- | ------- |
-| `/judge`            | **100**       | **100**        | **100** |
-| `/character`        | **100**       | **100**        | **100** |
-| `/character/haruka` | **100**       | **100**        | **100** |
+A interface inclui navegação por teclado e controles acessíveis; a validação de qualidade deve incluir testes manuais em navegadores e dispositivos reais, além da suíte automatizada.
 
-Relatórios HTML completos em `docs/evidencias/lighthouse-*.html`.
+## Licença e direitos autorais
 
-### Checklist de acessibilidade
+O código-fonte está disponibilizado conforme o arquivo [LICENSE](LICENSE). A licença do código **não** concede direitos sobre personagens, ilustrações, músicas, logotipos ou outras obras associadas ao MILGRAM.
 
-- ✅ Um `<h1>` por página, headings em ordem
-- ✅ `alt` descritivo em todas as imagens
-- ✅ `lang="pt-br"` no `<html>`
-- ✅ Navegação por teclado (`Tab`, `Esc`)
-- ✅ Focus visível em todos os botões
-- ✅ Modal com `role="dialog"`, `aria-modal`, focus trap
-- ✅ `aria-invalid` e `aria-live` no formulário de voto
-- ✅ Contraste ≥ 4.5:1 (WCAG AA)
-- ✅ `prefers-reduced-motion` respeitado (glitch + partículas)
+Este é um projeto pessoal de fã, sem fins comerciais, **não afiliado aos titulares oficiais de MILGRAM**.
 
----
-
-## 👥 Integrantes
-
-- **Nauan Gomes de Lima** — Desenvolvimento full-stack, design, documentação
-
----
-
-## 📊 Status
-
-MVP completo. Todas as etapas de 0 a 8 concluídas:
-
-- ✅ **Etapa 0** — Planejamento (ER, fluxos, wireframes)
-- ✅ **Etapa 1** — Setup + CI/CD (ESLint, Prettier, Husky, Vitest, Actions)
-- ✅ **Etapa 2** — `/judge` (grid + modal + voto + persistência)
-- ✅ **Etapa 3** — `/admin` (auth + controle de temporada)
-- ✅ **Etapa 4** — `/judge/result/[season]` (gráficos + veredito)
-- ✅ **Etapa 5** — Refinamento visual (tipografia, glitch, partículas, losangos)
-- ✅ **Etapa 6** — `/character` + `/character/[slug]`
-- ✅ **Etapa 7** — Acessibilidade + SEO (100/100 em todas as páginas)
-- ✅ **Etapa 8** — Testes E2E com Playwright (8/8)
-
-**Pronto para deploy.**
-
----
-
-## 📄 Licença
-
-O **código** deste projeto está licenciado sob a [MIT License](LICENSE). Veja o arquivo [LICENSE](LICENSE) para detalhes.
-
-**⚠️ Aviso de direitos autorais:**
-
-O nome "MILGRAM", os personagens, ilustrações, músicas, logotipos e demais elementos da obra original são propriedade de seus respectivos criadores e detentores de direitos:
-
-- **DECO\*27** (música)
-- **OTOIRO** (produção de vídeo)
-- **山中拓也** (roteiro)
-- **ミルグラム管理委員会** (comitê de gestão)
-
-Este é um **projeto pessoal de fã**, sem fins comerciais. A licença MIT se aplica **apenas ao código-fonte** deste repositório, não ao conteúdo da obra MILGRAM.
-
----
-
-_Projeto pessoal de fã. Não é um site oficial do MILGRAM._
+As fontes **MILGRAM English** e **MILGRAM Rune** foram criadas por
+[Mayim Kaijoshi](https://mayimkjs.itch.io/milgram-fonts) e são utilizadas
+com autorização. Essas fontes não estão cobertas pela licença MIT do código.

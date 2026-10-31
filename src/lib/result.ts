@@ -23,10 +23,13 @@ export function calculateResultStats(input: ResultInput): ResultStats {
       notForgivePercent: 0,
     };
   }
+  const forgivePercent = Math.round((input.forgiveCount / total) * 100);
   return {
     ...input,
     total,
-    forgivePercent: Math.round((input.forgiveCount / total) * 100),
-    notForgivePercent: Math.round((input.notForgiveCount / total) * 100),
+    forgivePercent,
+    // Complemento, e não um segundo Math.round: arredondar os dois lados separadamente
+    // soma 101% quando a fração termina em ,5 (ex.: 1 voto contra 7 = 12,5% / 87,5%)
+    notForgivePercent: 100 - forgivePercent,
   };
 }

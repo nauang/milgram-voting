@@ -1,6 +1,7 @@
-import { createHash } from "node:crypto";
+import { VOTE_WINDOW_MS } from "@/lib/constants";
 import { prisma } from "@/lib/db";
 import { getVisitorCookie } from "@/lib/voter";
+import { buildVoterKey } from "@/lib/voter-key";
 
 /**
  * Verifica se o visitante atual votou neste prisioneiro nas últimas 24h.
@@ -9,18 +10,15 @@ import { getVisitorCookie } from "@/lib/voter";
  */
 export async function hasVotedForPrisoner(prisonerId: number): Promise<boolean> {
   const cookieId = await getVisitorCookie();
-  if (!cookieId) return false;
+  if (!cookieId) {
+    return false;
+  }
 
-  const voterKey = createHash("sha256")
-    .update(`${cookieId}:${process.env.VOTER_SALT ?? "dev-salt-change-me"}`)
-    .digest("hex");
-
-  const limit24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
   const vote = await prisma.vote.findFirst({
     where: {
-      voterKey,
+      voterKey: buildVoterKey(cookieId),
       prisonerId,
-      createdAt: { gte: limit24h },
+      createdAt: { gte: new Date(Date.now() - VOTE_WINDOW_MS) },
     },
     select: { id: true },
   });

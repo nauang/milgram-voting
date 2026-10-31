@@ -4,6 +4,7 @@ import { Inter, Noto_Sans_JP } from "next/font/google";
 import { ParticlesBackground } from "@/components/ParticlesBackground";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 const inter = Inter({
@@ -22,6 +23,7 @@ const notoSansJP = Noto_Sans_JP({
 export const metadata: Metadata = {
   title: "MILGRAM | Votação",
   description: "Julgue os 10 prisioneiros do MILGRAM: perdoe ou não perdoe.",
+  metadataBase: new URL(SITE_URL),
 };
 
 export const viewport: Viewport = {

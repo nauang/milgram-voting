@@ -12,7 +12,8 @@ export const verdictSchema = z.enum(VERDICTS);
 
 /** Corpo do POST /api/vote. O seasonId é decidido no servidor (decisão F2). */
 export const voteBodySchema = z.object({
-  prisonerId: z.number().int().positive(),
+  // max = limite do INT do Postgres; acima disso o banco lança erro (500 em vez de 404)
+  prisonerId: z.number().int().positive().max(2_147_483_647),
   choice: voteChoiceSchema,
 });
 

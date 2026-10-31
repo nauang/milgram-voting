@@ -8,45 +8,121 @@ interface VoteDiamondProps {
   onClick: (choice: VoteChoice) => void;
 }
 
-export function VoteDiamond({ choice, disabled, onClick }: VoteDiamondProps) {
-  const isForgive = choice === "forgive";
-  const label = isForgive ? "Perdoar" : "Não perdoar";
-  const labelAria = `${label} este prisioneiro`;
-  const kanji = isForgive ? "赦す" : "赦さない";
+/**
+ * MILGRAM Voting — Botões de veredito.
+ *
+ * Identidade visual:
+ *
+ * Perdoar:
+ * - Azul-petróleo inspirado nos resultados
+ *   do MILGRAM oficial.
+ *
+ * Não perdoar:
+ * - Vermelho MILGRAM (#EA1016).
+ *
+ * Os diamantes são compactos para funcionar
+ * dentro das duas áreas do novo modal.
+ *
+ * Mantém:
+ * - Os valores originais de VoteChoice;
+ * - A callback onClick;
+ * - O estado disabled;
+ * - A identificação acessível;
+ * - Os caracteres japoneses originais.
+ */
 
-  const borderColor = isForgive ? "border-white" : "border-[#E4007F]";
-  const textColor = isForgive ? "text-white" : "text-[#E4007F]";
-  const hoverFill = isForgive
-    ? "group-hover:bg-white group-focus-visible:bg-white"
-    : "group-hover:bg-[#E4007F] group-focus-visible:bg-[#E4007F]";
-  const hoverText = isForgive
-    ? "group-hover:text-black group-focus-visible:text-black"
-    : "group-hover:text-white group-focus-visible:text-white";
-  const ringColor = isForgive ? "ring-white/40" : "ring-[#E4007F]/40";
-  const glow = isForgive
-    ? "group-hover:shadow-[0_0_24px_rgba(255,255,255,0.35)]"
-    : "group-hover:shadow-[0_0_24px_rgba(228,0,127,0.5)]";
+const VOTE_PRESENTATION = {
+  forgive: {
+    label: "Perdoar",
+    kanji: "赦す",
+    labelAria: "Perdoar este prisioneiro",
+
+    borderClass: "border-[#8ebdc4]",
+    backgroundClass: "bg-[#172c30]",
+    textClass: "text-[#c8e5e9]",
+
+    hoverBackground: "group-hover:bg-[#32555a] group-focus-visible:bg-[#32555a]",
+
+    hoverBorder: "group-hover:border-[#b1d8de] group-focus-visible:border-[#b1d8de]",
+
+    hoverText: "group-hover:text-white group-focus-visible:text-white",
+
+    glow: "group-hover:shadow-[0_0_24px_rgba(100,167,175,0.35)]",
+
+    focusClass: "focus-visible:outline-[#a4d0d6]",
+
+    detailClass: "bg-[#a4d0d6]",
+  },
+
+  not_forgive: {
+    label: "Não perdoar",
+    kanji: "赦さない",
+    labelAria: "Não perdoar este prisioneiro",
+
+    borderClass: "border-accent",
+    backgroundClass: "bg-[#301315]",
+    textClass: "text-accent-fg",
+
+    hoverBackground: "group-hover:bg-accent group-focus-visible:bg-accent",
+
+    hoverBorder: "group-hover:border-[#ff8589] group-focus-visible:border-[#ff8589]",
+
+    hoverText: "group-hover:text-white group-focus-visible:text-white",
+
+    glow: "group-hover:shadow-[0_0_24px_rgba(234,16,22,0.4)]",
+
+    focusClass: "focus-visible:outline-accent-fg",
+
+    detailClass: "bg-accent",
+  },
+} as const;
+
+export function VoteDiamond({ choice, disabled, onClick }: VoteDiamondProps) {
+  const presentation = VOTE_PRESENTATION[choice];
 
   return (
     <button
       type="button"
       onClick={() => onClick(choice)}
       disabled={disabled}
-      aria-label={labelAria}
-      className="group flex flex-col items-center gap-5 transition-all focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 sm:gap-6"
+      aria-label={presentation.labelAria}
+      className={`group flex w-full min-w-0 flex-col items-center justify-center gap-4 px-1 py-5 text-center transition-colors outline-none focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-40 ${presentation.focusClass}`}
     >
-      <div
-        className={`flex h-24 w-24 rotate-45 items-center justify-center border-2 ${borderColor} bg-black/60 transition-all duration-200 ease-out ${hoverFill} ${glow} group-hover:scale-110 group-focus-visible:scale-110 group-focus-visible:ring-4 group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-[#1a1a1a] ${ringColor} sm:h-32 sm:w-32`}
-      >
-        <span
-          className={`-rotate-45 text-lg font-bold tracking-wider ${textColor} ${hoverText} transition-colors duration-200 sm:text-2xl`}
-        >
-          {kanji}
-        </span>
-      </div>
+      {/* ======================================
+          DIAMANTE
+          ====================================== */}
 
-      <span className="text-[0.65rem] font-bold tracking-[0.2em] text-white/60 uppercase transition-colors group-hover:text-white group-focus-visible:text-white sm:text-xs">
-        {label}
+      <span className="relative flex h-24 w-24 shrink-0 items-center justify-center sm:h-28 sm:w-28">
+        {/* Forma geométrica rotacionada */}
+        <span
+          aria-hidden="true"
+          className={`absolute h-16 w-16 rotate-45 border-2 shadow-[0_8px_20px_rgba(0,0,0,0.25)] transition-[transform,background-color,border-color,box-shadow] duration-200 ease-out motion-safe:group-hover:scale-105 motion-safe:group-focus-visible:scale-105 sm:h-[72px] sm:w-[72px] ${presentation.borderClass} ${presentation.backgroundClass} ${presentation.hoverBackground} ${presentation.hoverBorder} ${presentation.glow}`}
+        />
+
+        {/* Inscrição japonesa */}
+        <span
+          aria-hidden="true"
+          lang="ja"
+          className={`relative z-10 text-sm leading-none font-bold tracking-normal whitespace-nowrap transition-colors duration-200 sm:text-base ${presentation.textClass} ${presentation.hoverText}`}
+        >
+          {presentation.kanji}
+        </span>
+      </span>
+
+      {/* ======================================
+          IDENTIFICAÇÃO DO VEREDITO
+          ====================================== */}
+
+      <span className="flex flex-col items-center gap-2">
+        <span className="text-center text-[10px] leading-snug font-black tracking-[0.08em] text-white uppercase transition-colors group-hover:text-white group-focus-visible:text-white sm:text-xs">
+          {presentation.label}
+        </span>
+
+        {/* Detalhe geométrico */}
+        <span
+          aria-hidden="true"
+          className={`h-[2px] w-8 opacity-70 transition-[width,opacity] duration-200 group-hover:w-12 group-hover:opacity-100 group-focus-visible:w-12 group-focus-visible:opacity-100 ${presentation.detailClass}`}
+        />
       </span>
     </button>
   );
