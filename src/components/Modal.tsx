@@ -322,7 +322,7 @@ export function Modal({ prisoner, isOpen, status, errorMessage, onClose, onVote 
                         </h3>
 
                         <div className="flex flex-wrap gap-3">
-                          {/* Perdoar */}
+                          {/* Inocente */}
                           <div className="flex min-w-[138px] flex-1 flex-col items-center gap-4 border border-[#32555a] bg-[#32555a]/15 p-3">
                             <div className="w-full border-b border-[#32555a]/60 pb-3 text-center">
                               <p className="font-mono text-[9px] font-bold tracking-wider text-[#a4d0d6] uppercase">
@@ -330,14 +330,14 @@ export function Modal({ prisoner, isOpen, status, errorMessage, onClose, onVote 
                               </p>
 
                               <p className="mt-2 text-xs font-black tracking-wide text-white uppercase">
-                                PERDOAR
+                                INOCENTE
                               </p>
                             </div>
 
                             <VoteDiamond choice="forgive" disabled={false} onClick={onVote} />
                           </div>
 
-                          {/* Não perdoar */}
+                          {/* Culpado */}
                           <div className="flex min-w-[138px] flex-1 flex-col items-center gap-4 border border-accent/70 bg-accent/10 p-3">
                             <div className="w-full border-b border-accent/50 pb-3 text-center">
                               <p className="font-mono text-[9px] font-bold tracking-wider text-accent-fg uppercase">
@@ -345,7 +345,7 @@ export function Modal({ prisoner, isOpen, status, errorMessage, onClose, onVote 
                               </p>
 
                               <p className="mt-2 text-xs font-black tracking-wide text-white uppercase">
-                                NÃO PERDOAR
+                                CULPADO
                               </p>
                             </div>
 

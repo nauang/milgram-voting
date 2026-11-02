@@ -43,7 +43,7 @@ export function ResultSplitBar({
       {/* Uma só barra: o comprimento de cada cor representa os votos reais. */}
       <div
         role="img"
-        aria-label={`Resultado da votação: Perdoar ${forgiveLabel} (${forgiveVotes} ${forgiveCount === 1 ? "voto" : "votos"}) e Não perdoar ${notForgiveLabel} (${notForgiveVotes} ${notForgiveCount === 1 ? "voto" : "votos"}).`}
+        aria-label={`Resultado da votação: Inocente ${forgiveLabel} (${forgiveVotes} ${forgiveCount === 1 ? "voto" : "votos"}) e Culpado ${notForgiveLabel} (${notForgiveVotes} ${notForgiveCount === 1 ? "voto" : "votos"}).`}
         className="flex h-18 w-full min-w-0 overflow-hidden border border-white/15 bg-black"
       >
         <div
@@ -88,7 +88,7 @@ export function ResultSplitBar({
         <div className="flex min-w-0 items-start gap-2">
           <span aria-hidden="true" className="mt-0.5 h-3 w-3 shrink-0 bg-[#32555a]" />
           <div className="min-w-0">
-            <p className="font-bold tracking-wide text-white uppercase">Perdoar</p>
+            <p className="font-bold tracking-wide text-white uppercase">Inocente</p>
             <p className="mt-1 text-white/75 tabular-nums">
               {forgiveLabel} · {forgiveVotes} {forgiveCount === 1 ? "voto" : "votos"}
             </p>
@@ -97,7 +97,7 @@ export function ResultSplitBar({
 
         <div className="flex min-w-0 items-start justify-end gap-2 text-right">
           <div className="min-w-0">
-            <p className="font-bold tracking-wide text-white uppercase">Não perdoar</p>
+            <p className="font-bold tracking-wide text-white uppercase">Culpado</p>
             <p className="mt-1 text-white/75 tabular-nums">
               {notForgiveLabel} · {notForgiveVotes} {notForgiveCount === 1 ? "voto" : "votos"}
             </p>

@@ -20,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return buildPageMetadata({
     title: `MILGRAM | Votação — Temporada ${season.number}`,
-    description: `Julgue os 10 prisioneiros da temporada ${season.number} do MILGRAM: perdoe ou não perdoe.`,
+    description: `Julgue os 10 prisioneiros da temporada ${season.number} do MILGRAM: inocente ou culpado.`,
     path: "/judge",
   });
 }
@@ -70,7 +70,7 @@ export default async function JudgePage() {
       : "O julgamento ainda não começou. Você poderá votar quando a temporada for iniciada.";
 
   const sectionDescription = isVoting
-    ? "Analise cada prisioneiro e escolha entre perdoar ou não perdoar."
+    ? "Analise cada prisioneiro e escolha se ele é inocente ou culpado."
     : isClosed
       ? "Confira os prisioneiros e os resultados desta temporada."
       : "Conheça os prisioneiros antes do início da votação.";
@@ -155,7 +155,7 @@ export default async function JudgePage() {
 
             {/* Frase temática */}
             <p className="mt-8 max-w-xl text-lg leading-relaxed font-bold tracking-wide text-white sm:text-xl">
-              PERDOAR OU NÃO PERDOAR?
+              INOCENTE OU CULPADO?
             </p>
 
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/65 sm:text-base">
@@ -260,13 +260,13 @@ export default async function JudgePage() {
           <div className="flex items-center gap-2">
             <span aria-hidden="true" className="h-2.5 w-2.5 border border-white bg-white" />
 
-            <span className="text-white/85">PERDOAR</span>
+            <span className="text-white/85">INOCENTE</span>
           </div>
 
           <div className="flex items-center gap-2">
             <span aria-hidden="true" className="h-2.5 w-2.5 bg-accent" />
 
-            <span className="text-white/85">NÃO PERDOAR</span>
+            <span className="text-white/85">CULPADO</span>
           </div>
 
           <span className="ml-auto font-mono text-[10px] text-white/40">TRIAL {trialNumber}</span>

@@ -13,11 +13,11 @@ interface VoteDiamondProps {
  *
  * Identidade visual:
  *
- * Inocentar:
+ * Inocente:
  * - Azul-petróleo inspirado nos resultados
  *   do MILGRAM oficial.
  *
- * Culpar:
+ * Culpado:
  * - Vermelho MILGRAM (#EA1016).
  *
  * Os diamantes são compactos para funcionar
@@ -33,46 +33,36 @@ interface VoteDiamondProps {
 
 const VOTE_PRESENTATION = {
   forgive: {
-    label: "Inocentar",
+    label: "Inocente",
     kanji: "赦す",
-    labelAria: "Inocentar este prisioneiro",
+    labelAria: "Declarar inocente",
 
     borderClass: "border-[#8ebdc4]",
     backgroundClass: "bg-[#172c30]",
     textClass: "text-[#c8e5e9]",
 
     hoverBackground: "group-hover:bg-[#32555a] group-focus-visible:bg-[#32555a]",
-
     hoverBorder: "group-hover:border-[#b1d8de] group-focus-visible:border-[#b1d8de]",
-
     hoverText: "group-hover:text-white group-focus-visible:text-white",
-
     glow: "group-hover:shadow-[0_0_24px_rgba(100,167,175,0.35)]",
-
     focusClass: "focus-visible:outline-[#a4d0d6]",
-
     detailClass: "bg-[#a4d0d6]",
   },
 
   not_forgive: {
-    label: "Culpar",
+    label: "Culpado",
     kanji: "赦さない",
-    labelAria: "Culpar este prisioneiro",
+    labelAria: "Declarar culpado",
 
     borderClass: "border-accent",
     backgroundClass: "bg-[#301315]",
     textClass: "text-accent-fg",
 
     hoverBackground: "group-hover:bg-accent group-focus-visible:bg-accent",
-
     hoverBorder: "group-hover:border-[#ff8589] group-focus-visible:border-[#ff8589]",
-
     hoverText: "group-hover:text-white group-focus-visible:text-white",
-
     glow: "group-hover:shadow-[0_0_24px_rgba(234,16,22,0.4)]",
-
     focusClass: "focus-visible:outline-accent-fg",
-
     detailClass: "bg-accent",
   },
 } as const;

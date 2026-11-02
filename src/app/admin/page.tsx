@@ -459,7 +459,7 @@ export default async function AdminPage() {
             <dl className="grid grid-cols-1 border-b border-white/15 sm:grid-cols-3">
               <div className="border-b border-white/10 bg-[#32555a]/10 p-5 sm:border-r sm:border-b-0">
                 <dt className="text-xs font-bold tracking-[0.1em] text-[#a4d0d6] uppercase">
-                  PERDOAR
+                  INOCENTE
                 </dt>
 
                 <dd className="mt-2 font-mono text-3xl font-black text-[#c8e5e9]">
@@ -469,7 +469,7 @@ export default async function AdminPage() {
 
               <div className="border-b border-white/10 bg-accent/5 p-5 sm:border-r sm:border-b-0">
                 <dt className="text-xs font-bold tracking-[0.1em] text-accent-fg uppercase">
-                  NÃO PERDOAR
+                  CULPADO
                 </dt>
 
                 <dd className="mt-2 font-mono text-3xl font-black text-accent-fg">
@@ -517,14 +517,14 @@ export default async function AdminPage() {
                         scope="col"
                         className="px-4 py-4 text-right font-mono text-[10px] font-bold tracking-[0.12em] text-[#a4d0d6] uppercase"
                       >
-                        PERDOAR
+                        INOCENTE
                       </th>
 
                       <th
                         scope="col"
                         className="px-4 py-4 text-right font-mono text-[10px] font-bold tracking-[0.12em] text-accent-fg uppercase"
                       >
-                        NÃO PERDOAR
+                        CULPADO
                       </th>
 
                       <th

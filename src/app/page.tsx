@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = buildPageMetadata({
   title: "MILGRAM | Voting System",
   description:
-    "Entre no julgamento de MILGRAM. Conheça os dez prisioneiros e decida quem merece ser perdoado.",
+    "Entre no julgamento de MILGRAM. Conheça os dez prisioneiros e decida quem é inocente ou culpado.",
   path: "/",
 });
 
@@ -132,7 +132,7 @@ export default async function HomePage() {
 
             <p className="mt-3 max-w-md text-sm leading-relaxed text-white/70 sm:text-base">
               Dez prisioneiros. Três julgamentos. Duas escolhas. Conheça suas histórias e decida
-              quem deve ser perdoado.
+              quem é inocente ou culpado.
             </p>
 
             {/* Status da temporada */}
@@ -307,7 +307,7 @@ export default async function HomePage() {
               </h3>
 
               <p className="mt-3 max-w-sm text-sm leading-relaxed text-white/65">
-                Escolha entre perdoar e não perdoar. Acompanhe o julgamento da temporada atual.
+                Escolha entre inocente e culpado. Acompanhe o julgamento da temporada atual.
               </p>
             </div>
 
@@ -408,7 +408,7 @@ export default async function HomePage() {
         <p className="milgram-kicker">YOUR VERDICT</p>
 
         <h2 className="milgram-heading mx-auto mt-5 max-w-3xl text-3xl sm:text-5xl">
-          PERDOAR OU NÃO PERDOAR?
+          INOCENTE OU CULPADO?
         </h2>
 
         <p className="mx-auto mt-5 max-w-xl text-sm leading-relaxed text-white/65">
