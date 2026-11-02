@@ -24,16 +24,14 @@ test.describe("/judge — fluxo de votação", () => {
     const modal = page.getByRole("dialog");
     await expect(modal).toBeVisible();
 
-    await expect(page.getByRole("button", { name: /^Inocentar este prisioneiro$/ })).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: /^Culpar este prisioneiro$/ }),
-    ).toBeVisible();
+    await expect(page.getByRole("button", { name: /^Declarar inocente$/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /^Declarar culpado$/ })).toBeVisible();
   });
 
   test("votar registra o voto e mostra feedback", async ({ page }) => {
     await page.locator("article").first().getByRole("button").click();
 
-    await page.getByRole("button", { name: /^Inocentar este prisioneiro$/ }).click();
+    await page.getByRole("button", { name: /^Declarar inocente$/ }).click();
 
     // Seleciona a confirmação exata dentro do status do modal,
     // sem confundir o texto japonês ou os badges dos cartões.
@@ -54,7 +52,7 @@ test.describe("/judge — fluxo de votação", () => {
 
   test("voto persiste após reload da página", async ({ page }) => {
     await page.locator("article").first().getByRole("button").click();
-    await page.getByRole("button", { name: /^Inocentar este prisioneiro$/ }).click();
+    await page.getByRole("button", { name: /^Declarar inocente$/ }).click();
 
     // Aguarda o modal fechar (1.5s de feedback + animação)
     await expect(page.getByRole("dialog")).not.toBeVisible({ timeout: 5000 });
