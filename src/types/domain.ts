@@ -4,7 +4,7 @@ import { z } from "zod";
 // então toda leitura/escrita passa por estes schemas.
 export const SEASON_STATUSES = ["idle", "voting", "closed"] as const;
 export const VOTE_CHOICES = ["forgive", "not_forgive"] as const;
-export const VERDICTS = ["lost", "not_guilty", "guilty"] as const;
+export const VERDICTS = ["not_guilty", "guilty"] as const;
 
 export const seasonStatusSchema = z.enum(SEASON_STATUSES);
 export const voteChoiceSchema = z.enum(VOTE_CHOICES);

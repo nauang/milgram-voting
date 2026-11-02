@@ -17,9 +17,10 @@ export function calculatePrisonerState({
   hasVoted,
 }: PrisonerStateInput): PrisonerState {
   if (seasonStatus === "closed") {
-    // Temporada encerrada sempre tem Result para os 10. Se faltar, "lost" mantém a UI de pé
-    // (o encerramento falha alto com DATA_INCONSISTENT antes de chegar aqui, decisão E5).
-    return verdict ?? "lost";
+    // Temporada encerrada sempre tem Result para os 10. Se faltar, "not_guilty" mantém
+    // a UI de pé (o encerramento falha alto com DATA_INCONSISTENT antes de chegar aqui,
+    // decisão E5).
+    return verdict ?? "not_guilty";
   }
   if (seasonStatus === "idle") {
     return "idle";

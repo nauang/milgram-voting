@@ -13,11 +13,11 @@ interface VoteDiamondProps {
  *
  * Identidade visual:
  *
- * Perdoar:
+ * Inocentar:
  * - Azul-petróleo inspirado nos resultados
  *   do MILGRAM oficial.
  *
- * Não perdoar:
+ * Culpar:
  * - Vermelho MILGRAM (#EA1016).
  *
  * Os diamantes são compactos para funcionar
@@ -33,9 +33,9 @@ interface VoteDiamondProps {
 
 const VOTE_PRESENTATION = {
   forgive: {
-    label: "Perdoar",
+    label: "Inocentar",
     kanji: "赦す",
-    labelAria: "Perdoar este prisioneiro",
+    labelAria: "Inocentar este prisioneiro",
 
     borderClass: "border-[#8ebdc4]",
     backgroundClass: "bg-[#172c30]",
@@ -55,9 +55,9 @@ const VOTE_PRESENTATION = {
   },
 
   not_forgive: {
-    label: "Não perdoar",
+    label: "Culpar",
     kanji: "赦さない",
-    labelAria: "Não perdoar este prisioneiro",
+    labelAria: "Culpar este prisioneiro",
 
     borderClass: "border-accent",
     backgroundClass: "bg-[#301315]",

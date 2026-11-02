@@ -423,7 +423,7 @@ export default async function CharacterPage({ params }: PageProps) {
                   <ul className="space-y-3">
                     {prisoner.results.map((result) => {
                       const verdict =
-                        VERDICT_PRESENTATION[result.verdict] ?? VERDICT_PRESENTATION.lost;
+                        VERDICT_PRESENTATION[result.verdict] ?? VERDICT_PRESENTATION.not_guilty;
 
                       return (
                         <li
@@ -490,21 +490,15 @@ const VERDICT_PRESENTATION: Record<
   }
 > = {
   not_guilty: {
-    label: "Perdoado",
+    label: "Inocente",
     icon: "○",
     className: "border-white bg-white text-black",
   },
 
   guilty: {
-    label: "Não perdoado",
+    label: "Culpado",
     icon: "✕",
     className: "border-accent bg-accent text-white",
-  },
-
-  lost: {
-    label: "Empate",
-    icon: "?",
-    className: "border-white/50 bg-black text-white",
   },
 };
 
@@ -532,18 +526,13 @@ function StateBadge({ state }: { state: string }) {
       className: "border-accent bg-accent text-white",
     },
 
-    lost: {
-      label: "Empate",
-      className: "border-white/60 bg-black text-white",
-    },
-
     not_guilty: {
-      label: "Perdoado",
+      label: "Inocente",
       className: "border-white bg-white text-black",
     },
 
     guilty: {
-      label: "Não perdoado",
+      label: "Culpado",
       className: "border-accent bg-accent text-white",
     },
 

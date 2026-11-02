@@ -101,7 +101,12 @@ describe.skipIf(!CAN_RUN)("POST /api/vote (integração, Postgres real)", () => 
     expect(new Date(secondBody.retryAt).getTime()).toBeGreaterThan(Date.now());
   });
 
-  it("20 votos PARALELOS do mesmo visitante no mesmo prisioneiro gravam exatamente 1", async () => {
+  it("8 votos PARALELOS do mesmo visitante no mesmo prisioneiro gravam exatamente 1", async () => {
+    // 8 paralelos: abaixo do pool de conexões (o mesmo racional de season-route.test.ts).
+    // O pooler do Supabase (free tier) rejeita acima disso com P2028 e o teste passaria a
+    // exercitar o pool em vez do lock. 8 já é suficiente para provar a invariante.
+    const CONCURRENT_VOTES = 8;
+
     // Obtém um cookie válido votando em OUTRO prisioneiro (não depende do nome do cookie)
     const mint = await POST(
       voteRequest(JSON.stringify({ prisonerId: firstPrisonerId, choice: "forgive" })),
@@ -111,12 +116,12 @@ describe.skipIf(!CAN_RUN)("POST /api/vote (integração, Postgres real)", () => 
 
     const raceBody = JSON.stringify({ prisonerId: secondPrisonerId, choice: "not_forgive" });
     const responses = await Promise.all(
-      Array.from({ length: 20 }, () => POST(voteRequest(raceBody, cookie))),
+      Array.from({ length: CONCURRENT_VOTES }, () => POST(voteRequest(raceBody, cookie))),
     );
     const statuses = responses.map((response) => response.status);
 
     expect(statuses.filter((status) => status === 201)).toHaveLength(1);
-    expect(statuses.filter((status) => status === 409)).toHaveLength(19);
+    expect(statuses.filter((status) => status === 409)).toHaveLength(CONCURRENT_VOTES - 1);
 
     const stored = await prisma.vote.count({
       where: { prisonerId: secondPrisonerId, id: { gt: lastVoteIdBeforeTests } },

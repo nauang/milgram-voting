@@ -16,8 +16,10 @@ describe("calculatePrisonerState", () => {
     ).toBe("guilty");
   });
 
-  it("retorna lost se closed sem verdict", () => {
-    expect(calculatePrisonerState({ seasonStatus: "closed", hasVoted: false })).toBe("lost");
+  it("retorna not_guilty se closed sem verdict", () => {
+    expect(calculatePrisonerState({ seasonStatus: "closed", hasVoted: false })).toBe(
+      "not_guilty",
+    );
   });
 
   it("retorna voted quando já votou", () => {

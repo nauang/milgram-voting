@@ -2,14 +2,14 @@ import { describe, expect, it } from "vitest";
 import { calculateResultStats } from "@/lib/result";
 
 const stats = (forgiveCount: number, notForgiveCount: number) =>
-  calculateResultStats({ forgiveCount, notForgiveCount, verdict: "lost" });
+  calculateResultStats({ forgiveCount, notForgiveCount, verdict: "not_guilty" });
 
 describe("calculateResultStats", () => {
   it("zero votos: tudo zero, sem NaN nem divisão por zero", () => {
     expect(stats(0, 0)).toEqual({
       forgiveCount: 0,
       notForgiveCount: 0,
-      verdict: "lost",
+      verdict: "not_guilty",
       total: 0,
       forgivePercent: 0,
       notForgivePercent: 0,

@@ -85,7 +85,7 @@ async function getSeasonData(seasonParam: string) {
       stats: calculateResultStats({
         forgiveCount: result?.forgiveCount ?? 0,
         notForgiveCount: result?.notForgiveCount ?? 0,
-        verdict: parsedVerdict.success ? parsedVerdict.data : "lost",
+        verdict: parsedVerdict.success ? parsedVerdict.data : "not_guilty",
       }),
     };
   });
@@ -319,7 +319,7 @@ export default async function ResultPage({ params }: PageProps) {
               </span>
 
               <div>
-                <p className="text-xs font-black tracking-[0.1em] text-white uppercase">PERDOAR</p>
+                <p className="text-xs font-black tracking-[0.1em] text-white uppercase">INOCENTAR</p>
 
                 <p className="mt-1 text-xs text-[#a4d0d6]">Votos pelo perdão</p>
               </div>
@@ -341,7 +341,7 @@ export default async function ResultPage({ params }: PageProps) {
 
               <div>
                 <p className="text-xs font-black tracking-[0.1em] text-white uppercase">
-                  NÃO PERDOAR
+                  CULPAR
                 </p>
 
                 <p className="mt-1 text-xs text-accent-fg">Votos contrários ao perdão</p>
@@ -412,17 +412,12 @@ export default async function ResultPage({ params }: PageProps) {
 
           <span className="inline-flex items-center gap-2 text-xs font-bold text-white/85 uppercase">
             <span aria-hidden="true" className="h-3 w-3 border border-white bg-white" />
-            PERDOADO
+            INOCENTE
           </span>
 
           <span className="inline-flex items-center gap-2 text-xs font-bold text-white/85 uppercase">
             <span aria-hidden="true" className="h-3 w-3 bg-accent" />
-            NÃO PERDOADO
-          </span>
-
-          <span className="inline-flex items-center gap-2 text-xs font-bold text-white/85 uppercase">
-            <span aria-hidden="true" className="h-3 w-3 border border-white/60 bg-black" />
-            EMPATE
+            CULPADO
           </span>
         </div>
 

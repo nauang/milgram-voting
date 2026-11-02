@@ -53,17 +53,8 @@ const STATE_PRESENTATION: Record<
     stripeClass: "bg-accent",
   },
 
-  lost: {
-    label: "Empate",
-    icon: "?",
-    badgeClass: "border-white/60 bg-[#101010]/95 text-white",
-    borderClass: "border-white/30",
-    imageClass: "grayscale",
-    stripeClass: "bg-white/40",
-  },
-
   not_guilty: {
-    label: "Perdoado",
+    label: "Inocente",
     icon: "○",
     badgeClass: "border-white bg-white text-black",
     borderClass: "border-white",
@@ -72,7 +63,7 @@ const STATE_PRESENTATION: Record<
   },
 
   guilty: {
-    label: "Não perdoado",
+    label: "Culpado",
     icon: "✕",
     badgeClass: "border-accent bg-accent text-white",
     borderClass: "border-accent",
@@ -161,7 +152,7 @@ export function PrisonerCard({
    */
   const isVotable = onSelect !== undefined && (state === "voting" || state === "voted");
 
-  const isResultLink = state === "lost" || state === "not_guilty" || state === "guilty";
+  const isResultLink = state === "not_guilty" || state === "guilty";
 
   const isInteractive = isVotable || isResultLink;
 

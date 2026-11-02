@@ -14,22 +14,15 @@ interface ResultCardProps {
 }
 
 const VERDICT_PRESENTATION = {
-  lost: {
-    label: "Empate",
-    code: "TIE",
-    icon: "?",
-    badgeClass: "border-white/40 bg-black/40 text-white",
-  },
-
   not_guilty: {
-    label: "Perdoado",
+    label: "Inocente",
     code: "NOT GUILTY",
     icon: "○",
     badgeClass: "border-[#8ebdc4] bg-[#32555a]/20 text-[#c8e5e9]",
   },
 
   guilty: {
-    label: "Não perdoado",
+    label: "Culpado",
     code: "GUILTY",
     icon: "✕",
     badgeClass: "border-accent bg-accent/15 text-accent-fg",

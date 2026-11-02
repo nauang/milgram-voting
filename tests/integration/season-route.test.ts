@@ -90,7 +90,7 @@ describe.skipIf(!CAN_RUN)("rotas de temporada (integração, Postgres real)", ()
     expect((await decimal.json()).code).toBe("INVALID_SEASON");
   });
 
-  it("encerra com ZERO votos: 10 resultados 'lost' e a T2 começa", async () => {
+  it("encerra com ZERO votos: 10 resultados 'not_guilty' e a T2 começa", async () => {
     const response = await callSeasonRoute("closeVoting", { confirm: true, number: 1 });
     const body = await response.json();
 
@@ -98,12 +98,12 @@ describe.skipIf(!CAN_RUN)("rotas de temporada (integração, Postgres real)", ()
     expect(body.next).toBe(2);
     const results = await prisma.result.findMany();
     expect(results).toHaveLength(10);
-    expect(results.every((result) => result.verdict === "lost")).toBe(true);
+    expect(results.every((result) => result.verdict === "not_guilty")).toBe(true);
     expect(await statusOf(1)).toBe("closed");
     expect(await statusOf(2)).toBe("voting");
   });
 
-  it("aplica o veredito: maioria, empate e maioria contrária", async () => {
+  it("aplica o veredito: maioria inocenta, empate inocenta, maioria condena", async () => {
     const season = await prisma.season.findUniqueOrThrow({ where: { number: 1 } });
     const [perdoado, empatado, condenado] = prisonerIds;
     const vote = (prisonerId: number, choice: string, index: number) => ({
@@ -129,7 +129,7 @@ describe.skipIf(!CAN_RUN)("rotas de temporada (integração, Postgres real)", ()
     const byPrisoner = async (prisonerId: number) =>
       prisma.result.findFirstOrThrow({ where: { prisonerId } });
     expect((await byPrisoner(perdoado ?? 0)).verdict).toBe("not_guilty");
-    expect((await byPrisoner(empatado ?? 0)).verdict).toBe("lost");
+    expect((await byPrisoner(empatado ?? 0)).verdict).toBe("not_guilty");
     const guilty = await byPrisoner(condenado ?? 0);
     expect(guilty.verdict).toBe("guilty");
     expect(guilty.notForgiveCount).toBe(2);
